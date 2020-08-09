@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function(e) {
 
 				testimonialForm.querySelector('.js-form-success').classList.add('show');
 				testimonialForm.reset();
-				window.location.replace("/");      
+				// window.location.replace("/"); 
 			}) 
 	});
 });
