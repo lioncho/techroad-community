@@ -13,3 +13,5 @@ RewriteRule . /index.php [L]
 # BEGIN Hotlinking
 
 # END Hotlinking
+
+php_value max_input_vars 3000

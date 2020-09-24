@@ -16,8 +16,8 @@ if (!function_exists('wpqa_captcha')) :
 		$captcha_users = wpqa_options("captcha_users");
 		if ($the_captcha == "on" && ($captcha_users == "both" || ($captcha_users == "unlogged" && !is_user_logged_in()))) {
 			$out .= "<div class='".($captcha_style == "question_answer"?"wpqa_captcha_question":"wpqa_captcha_normal")."'><".($comment == "comment"?"div":"p")." class='wpqa_captcha_p".($comment == "comment"?" form-input form-input-full clearfix":"")."'>";
-				$out .= ($comment == "comment"?"":"<label for='wpqa_captcha_".$rand."'>".esc_html__('Captcha','wpqa')."<span class='required'>*</span></label>").'<input'.($comment == "comment"?" placeholder='".esc_attr__("Captcha","wpqa")."'":"").' id="wpqa_captcha_'.$rand.'" name="wpqa_captcha" class="wpqa_captcha'.($captcha_style == "question_answer"?" captcha_answer":"").'" type="text">
-				'.($type == 'comment'?'':'<i class="icon-pencil"></i>');
+			$out .= ($comment == "comment"?"":"<label for='wpqa_captcha_".$rand."'>".esc_html__('Captcha','wpqa')."<span class='required'>*</span></label>").'<input'.($comment == "comment"?" placeholder='".esc_attr__("Captcha","wpqa")."'":"").' id="wpqa_captcha_'.$rand.'" name="wpqa_captcha" class="wpqa_captcha'.($captcha_style == "question_answer"?" captcha_answer":"").'" type="text">
+			'.($type == 'comment'?'':'<i class="icon-pencil"></i>');
 			if ($captcha_style == "question_answer") {
 				$out .= "<span class='wpqa_captcha_span'>".$captcha_question.($show_captcha_answer == "on"?" ( ".$captcha_answer." )":"")."</span>";
 			}else {
@@ -89,48 +89,50 @@ endif;
 /* Send Email */
 if (!function_exists('wpqa_sendEmail')) :
 	function wpqa_sendEmail($fromEmail,$fromEmailName,$toEmail,$toEmailName,$subject,$message) {
-		$mail = new PHPMailer\PHPMailer\PHPMailer();
-		$mail->isSendmail();
-		$mail_smtp = wpqa_options("mail_smtp");
-		if ($mail_smtp == "on") {
-			$mail_host = wpqa_options("mail_host");
-			$mail_username = wpqa_options("mail_username");
-			$mail_password = wpqa_options("mail_password");
-			$mail_secure = wpqa_options("mail_secure");
-			$mail_port = wpqa_options("mail_port");
-			$disable_ssl = wpqa_options("disable_ssl");
-			$smtp_auth = wpqa_options("smtp_auth");
-			if ($mail_host != "" && $mail_port != "" && $mail_username != "" && $mail_password != "" && $mail_secure != "") {
-				$mail->isSMTP();
-				$mail->Host = $mail_host;
-				if ($smtp_auth = "on") {
-					$mail->SMTPAuth = true;
-				}
-				$mail->Username = $mail_username;
-				$mail->Password = $mail_password;
-				if ($mail_secure != "none") {
-					$mail->SMTPSecure = $mail_secure;
-				}
-				$mail->Port = $mail_port;
-			}
-			if ($disable_ssl == "on") {
-				$mail->SMTPOptions = array(
-					'ssl' => array(
-						'verify_peer' => false,
-						'verify_peer_name' => false,
-						'allow_self_signed' => true
-					)
-				);
-			}
-		}
-		$mail->isHTML(true);
-		$mail->setFrom($fromEmail,$fromEmailName);
-		$mail->addReplyTo($fromEmail,$fromEmailName);
-		$mail->addAddress($toEmail,$toEmailName);
-		$mail->CharSet = 'UTF-8';
-		$mail->Subject = $subject;
-		$mail->msgHTML($message,__DIR__);
-		$mail->send();
+		$headers = ['Content-Type: text/html; charset=UTF-8','From: '.$fromEmailName.''.$fromEmail]	;
+		wp_mail($toEmail, $subject,$message,$headers);
+		// $mail = new PHPMailer\PHPMailer\PHPMailer();
+		// $mail->isSendmail();
+		// $mail_smtp = wpqa_options("mail_smtp");
+		// if ($mail_smtp == "on") {
+		// 	$mail_host = wpqa_options("mail_host");
+		// 	$mail_username = wpqa_options("mail_username");
+		// 	$mail_password = wpqa_options("mail_password");
+		// 	$mail_secure = wpqa_options("mail_secure");
+		// 	$mail_port = wpqa_options("mail_port");
+		// 	$disable_ssl = wpqa_options("disable_ssl");
+		// 	$smtp_auth = wpqa_options("smtp_auth");
+		// 	if ($mail_host != "" && $mail_port != "" && $mail_username != "" && $mail_password != "" && $mail_secure != "") {
+		// 		$mail->isSMTP();
+		// 		$mail->Host = $mail_host;
+		// 		if ($smtp_auth = "on") {
+		// 			$mail->SMTPAuth = true;
+		// 		}
+		// 		$mail->Username = $mail_username;
+		// 		$mail->Password = $mail_password;
+		// 		if ($mail_secure != "none") {
+		// 			$mail->SMTPSecure = $mail_secure;
+		// 		}
+		// 		$mail->Port = $mail_port;
+		// 	}
+		// 	if ($disable_ssl == "on") {
+		// 		$mail->SMTPOptions = array(
+		// 			'ssl' => array(
+		// 				'verify_peer' => false,
+		// 				'verify_peer_name' => false,
+		// 				'allow_self_signed' => true
+		// 			)
+		// 		);
+		// 	}
+		// }
+		// $mail->isHTML(true);
+		// $mail->setFrom($fromEmail,$fromEmailName);
+		// $mail->addReplyTo($fromEmail,$fromEmailName);
+		// $mail->addAddress($toEmail,$toEmailName);
+		// $mail->CharSet = 'UTF-8';
+		// $mail->Subject = $subject;
+		// $mail->msgHTML($message,__DIR__);
+		// $mail->send();
 	}
 endif;
 /* Send email template */
@@ -215,56 +217,56 @@ if (!function_exists('wpqa_email_code')) :
 		$background_email = wpqa_options("background_email");
 		$background_email = ($background_email != ""?$background_email:"#272930");
 		return '<div style="word-wrap:break-word;'.(is_rtl()?"direction:rtl;":"").'">
-			<div>
-				<div>
-					<div style="margin:0;background-color:#f4f3f4;font-family:Helvetica,Arial,sans-serif;font-size:12px" text="#444" bgcolor="#F4F3F4" link="#21759B" alink="#21759B" vlink="#21759B" marginheight="0" marginwidth="0">
-						<table border="0" width="100%" cellspacing="0" cellpadding="0" bgcolor="#F4F3F4">
-							<tbody>
-							<tr>
-							<td style="padding:15px">
-								<center>
-									<table width="550" cellspacing="0" cellpadding="0" align="center" bgcolor="#FFF">
-									<tbody>
-									<tr>
-									<td align="center">
-									<div style="border:solid 1px #d9d9d9;padding-right:30px;padding-left:30px">
-									<table style="line-height:1.6;font-size:12px;font-family:Helvetica,Arial,sans-serif;border:solid 1px #FFF;color:#444;" border="0" width="100%" cellspacing="0" cellpadding="0" bgcolor="#ffffff">
-									<tbody>
-									<tr>
-									<td style="color:#FFF" colspan="2" valign="bottom" height="30"></td>
-									</tr>
-									<tr>
-									<td style="line-height:32px;padding:30px 30px 20px;text-align:center;background-color:'.$background_email.';" valign="baseline"><a href="'.esc_url(home_url('/')).'" target="_blank">'.($logo_email_template != ''?'<img alt="'.esc_attr(get_option('blogname')).'" src="'.$logo_email_template.'">':'').'</a></td>
-									</tr>
-									
-									<tr>
-									<td colspan="2">
-									<div style="padding-top:10px;color:#444;">'.$content.'</div>
-									</td>
-									</tr>
-									</tbody>
-									</table>
-									</div>
-									</td>
-									</tr>
-									
-									</tbody>
-									</table>
-									
-									<table style="margin-top:10px;color:#444;line-height:1.6;font-size:12px;font-family:Arial,sans-serif" border="0" width="490" cellspacing="0" cellpadding="0" bgcolor="#FFF">
-									<tbody>
-									
-									</tbody>
-									</table>
-									
-								</center>
-							</td>
-							</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
+		<div>
+		<div>
+		<div style="margin:0;background-color:#f4f3f4;font-family:Helvetica,Arial,sans-serif;font-size:12px" text="#444" bgcolor="#F4F3F4" link="#21759B" alink="#21759B" vlink="#21759B" marginheight="0" marginwidth="0">
+		<table border="0" width="100%" cellspacing="0" cellpadding="0" bgcolor="#F4F3F4">
+		<tbody>
+		<tr>
+		<td style="padding:15px">
+		<center>
+		<table width="550" cellspacing="0" cellpadding="0" align="center" bgcolor="#FFF">
+		<tbody>
+		<tr>
+		<td align="center">
+		<div style="border:solid 1px #d9d9d9;padding-right:30px;padding-left:30px">
+		<table style="line-height:1.6;font-size:12px;font-family:Helvetica,Arial,sans-serif;border:solid 1px #FFF;color:#444;" border="0" width="100%" cellspacing="0" cellpadding="0" bgcolor="#ffffff">
+		<tbody>
+		<tr>
+		<td style="color:#FFF" colspan="2" valign="bottom" height="30"></td>
+		</tr>
+		<tr>
+		<td style="line-height:32px;padding:30px 30px 20px;text-align:center;background-color:'.$background_email.';" valign="baseline"><a href="'.esc_url(home_url('/')).'" target="_blank">'.($logo_email_template != ''?'<img alt="'.esc_attr(get_option('blogname')).'" src="'.$logo_email_template.'">':'').'</a></td>
+		</tr>
+
+		<tr>
+		<td colspan="2">
+		<div style="padding-top:10px;color:#444;">'.$content.'</div>
+		</td>
+		</tr>
+		</tbody>
+		</table>
+		</div>
+		</td>
+		</tr>
+
+		</tbody>
+		</table>
+
+		<table style="margin-top:10px;color:#444;line-height:1.6;font-size:12px;font-family:Arial,sans-serif" border="0" width="490" cellspacing="0" cellpadding="0" bgcolor="#FFF">
+		<tbody>
+
+		</tbody>
+		</table>
+
+		</center>
+		</td>
+		</tr>
+		</tbody>
+		</table>
+		</div>
+		</div>
+		</div>
 		</div>';
 	}
 endif;
@@ -516,8 +518,8 @@ if (!function_exists('wpqa_admin_bar')) :
 		global $wp_admin_bar;
 		if (is_super_admin()) {
 			if (wpqa_is_user_profile()) {
-	    		$wpqa_user_id = (int)get_query_var(apply_filters('wpqa_user_id','wpqa_user_id'));
-	    		if ($wpqa_user_id > 0) {
+				$wpqa_user_id = (int)get_query_var(apply_filters('wpqa_user_id','wpqa_user_id'));
+				if ($wpqa_user_id > 0) {
 					$wp_admin_bar->add_menu( array(
 						'parent' => 0,
 						'id' => 'questions_draft',
@@ -605,7 +607,7 @@ if (!function_exists('wpqa_all_comments_of_post_type')) :
 			WHERE post_type = '$post_type' 
 			AND post_status = 'publish')
 			AND comment_approved = '1'
-		");
+			");
 		return $comments;
 	}
 endif;
@@ -633,20 +635,20 @@ if (!function_exists('wpqa_get_messages')) :
 			while ( $messages_query->have_posts() ) { $messages_query->the_post();
 				$message_new = get_post_meta($post->ID,'message_new',true);
 				$output .= '<li>
-					<i class="message_new'.($message_new == 1 || $message_new == "on"?" message-new":"").' icon-mail"></i>
-					<div>';
-						$display_name = get_the_author_meta('display_name',$post->post_author);
-						if ($post->post_author > 0) {
-							$output .= '<a href="'.get_author_posts_url($post->post_author).'">'.$display_name.'</a>';
-						}else {
-							$output .= get_post_meta($post->ID,'message_username',true);
-						}
-						$output .= ' '.esc_html__("has","wpqa").' <a href="'.esc_url(wpqa_get_profile_permalink($user_id,"messages")).'">'.esc_html__("sent a message for you.","wpqa").'</a>
-						<span class="notifications-date">'.sprintf(esc_html__('%1$s at %2$s','wpqa'),get_the_time($date_format),get_the_time($time_format)).'</span>
-					</div>
+				<i class="message_new'.($message_new == 1 || $message_new == "on"?" message-new":"").' icon-mail"></i>
+				<div>';
+				$display_name = get_the_author_meta('display_name',$post->post_author);
+				if ($post->post_author > 0) {
+					$output .= '<a href="'.get_author_posts_url($post->post_author).'">'.$display_name.'</a>';
+				}else {
+					$output .= get_post_meta($post->ID,'message_username',true);
+				}
+				$output .= ' '.esc_html__("has","wpqa").' <a href="'.esc_url(wpqa_get_profile_permalink($user_id,"messages")).'">'.esc_html__("sent a message for you.","wpqa").'</a>
+				<span class="notifications-date">'.sprintf(esc_html__('%1$s at %2$s','wpqa'),get_the_time($date_format),get_the_time($time_format)).'</span>
+				</div>
 				</li>';
 			}
-				
+
 			$output .= '</ul>';
 			if ($more_button == "on") {
 				$output .= '<a href="'.esc_url(wpqa_get_profile_permalink($user_id,"messages")).'">'.esc_html__("Show all messages.","wpqa").'</a>';
@@ -780,92 +782,92 @@ if (!function_exists('wpqa_show_notifications')) :
 		if (!empty($whats_type_result["post_id"]) && empty($whats_type_result["comment_id"]) && $get_post_status != "trash" && isset($get_the_permalink) && $get_the_permalink != "") {
 			$output .= '<a href="'.esc_url($get_the_permalink).'">';
 		}
-			if ($whats_type_result["text"] == "poll_question") {
-				$output .= esc_html__("polled at your question","wpqa");
-			}else if ($whats_type_result["text"] == "gift_site") {
-				$output .= esc_html__("Gift of the site","wpqa");
-			}else if ($whats_type_result["text"] == "admin_add_points") {
-				$output .= esc_html__("The administrator added points for you.","wpqa");
-			}else if ($whats_type_result["text"] == "admin_remove_points") {
-				$output .= esc_html__("The administrator removed points from you.","wpqa");
-			}else if ($whats_type_result["text"] == "question_vote_up") {
-				$output .= esc_html__("voted up your question.","wpqa");
-			}else if ($whats_type_result["text"] == "question_vote_down") {
-				$output .= esc_html__("voted down your question.","wpqa");
-			}else if ($whats_type_result["text"] == "answer_vote_up") {
-				$output .= esc_html__("voted up you answered.","wpqa");
-			}else if ($whats_type_result["text"] == "answer_vote_down") {
-				$output .= esc_html__("voted down you answered.","wpqa");
-			}else if ($whats_type_result["text"] == "user_follow") {
-				$output .= esc_html__("followed you.","wpqa");
-			}else if ($whats_type_result["text"] == "user_unfollow") {
-				$output .= esc_html__("unfollowed you.","wpqa");
-			}else if ($whats_type_result["text"] == "point_back") {
-				$output .= esc_html__("Your point back because the best answer selected.","wpqa");
-			}else if ($whats_type_result["text"] == "select_best_answer") {
-				$output .= esc_html__("chosen your answer best answer.","wpqa");
-			}else if ($whats_type_result["text"] == "point_removed") {
-				$output .= esc_html__("Your point removed because the best answer removed.","wpqa");
-			}else if ($whats_type_result["text"] == "cancel_best_answer") {
-				$output .= esc_html__("canceled your answer best answer.","wpqa");
-			}else if ($whats_type_result["text"] == "answer_asked_question") {
-				$output .= esc_html__("answered at your asked question.","wpqa");
-			}else if ($whats_type_result["text"] == "answer_question") {
-				$output .= esc_html__("answered your question.","wpqa");
-			}else if ($whats_type_result["text"] == "answer_question_follow") {
-				$output .= esc_html__("answered your question you followed.","wpqa");
-			}else if ($whats_type_result["text"] == "add_question") {
-				$output .= esc_html__("added a new question.","wpqa");
-			}else if ($whats_type_result["text"] == "add_question_user") {
-				$output .= esc_html__("been asked you a question.","wpqa");
-			}else if ($whats_type_result["text"] == "question_favorites") {
-				$output .= esc_html__("added your question to favorites.","wpqa");
-			}else if ($whats_type_result["text"] == "question_remove_favorites") {
-				$output .= esc_html__("removed your question from favorites.","wpqa");
-			}else if ($whats_type_result["text"] == "follow_question") {
-				$output .= esc_html__("followed your question.","wpqa");
-			}else if ($whats_type_result["text"] == "unfollow_question") {
-				$output .= esc_html__("unfollowed your question.","wpqa");
-			}else if ($whats_type_result["text"] == "approved_answer") {
-				$output .= esc_html__("The administrator approved your answer.","wpqa");
-			}else if ($whats_type_result["text"] == "approved_comment") {
-				$output .= esc_html__("The administrator approved your comment.","wpqa");
-			}else if ($whats_type_result["text"] == "approved_question") {
-				$output .= esc_html__("The administrator approved your question.","wpqa");
-			}else if ($whats_type_result["text"] == "approved_message") {
-				$output .= "<a href='".esc_url(wpqa_get_profile_permalink(get_current_user_id(),"messages"))."'>".esc_html__("The administrator approved your message.","wpqa")."</a>";
-			}else if ($whats_type_result["text"] == "answer_review") {
-				$output .= esc_html__("The administrator review your answer.","wpqa");
-			}else if ($whats_type_result["text"] == "question_review") {
-				$output .= esc_html__("The administrator review your question.","wpqa");
-			}else if ($whats_type_result["text"] == "approved_post") {
-				$output .= esc_html__("The administrator approved your post.","wpqa");
-			}else if ($whats_type_result["text"] == "action_comment") {
-				$output .= sprintf(esc_html__("The administrator %s your %s.","wpqa"),$whats_type_result["more_text"],(isset($whats_type_result["type_of_item"]) && $whats_type_result["type_of_item"] == "answer"?esc_html__("answer","wpqa"):esc_html__("comment","wpqa")));
-			}else if ($whats_type_result["text"] == "action_post") {
-				$output .= sprintf(esc_html__("The administrator %s your %s.","wpqa"),$whats_type_result["more_text"],(isset($whats_type_result["type_of_item"]) && $whats_type_result["type_of_item"] == "question"?esc_html__("question","wpqa"):esc_html__("post","wpqa")));
-			}else if ($whats_type_result["text"] == "delete_reason") {
-				$output .= sprintf(esc_html__("The administrator reason: %s.","wpqa"),$whats_type_result["more_text"]);
-			}else if ($whats_type_result["text"] == "delete_question" || $whats_type_result["text"] == "delete_post") {
-				if (isset($whats_type_result["type_of_item"]) && $whats_type_result["type_of_item"] == "question") {
-					$output .= esc_html__("Your question was deleted.","wpqa");
-				}else {
-					$output .= esc_html__("Your post was deleted.","wpqa");
-				}
-			}else if ($whats_type_result["text"] == "delete_answer" || $whats_type_result["text"] == "delete_comment") {
-				if (isset($whats_type_result["type_of_item"]) && $whats_type_result["type_of_item"] == "answer") {
-					$output .= esc_html__("Your answer was deleted.","wpqa");
-				}else {
-					$output .= esc_html__("Your comment was deleted.","wpqa");
-				}
-			}else if ($whats_type_result["text"] == "add_message_user") {
-				$output .= "<a href='".esc_url(wpqa_get_profile_permalink(get_current_user_id(),"messages"))."'>".esc_html__("sent a message for you.","wpqa")."</a>";
-			}else if ($whats_type_result["text"] == "seen_message") {
-				$output .= esc_html__("seen your message.","wpqa");
+		if ($whats_type_result["text"] == "poll_question") {
+			$output .= esc_html__("polled at your question","wpqa");
+		}else if ($whats_type_result["text"] == "gift_site") {
+			$output .= esc_html__("Gift of the site","wpqa");
+		}else if ($whats_type_result["text"] == "admin_add_points") {
+			$output .= esc_html__("The administrator added points for you.","wpqa");
+		}else if ($whats_type_result["text"] == "admin_remove_points") {
+			$output .= esc_html__("The administrator removed points from you.","wpqa");
+		}else if ($whats_type_result["text"] == "question_vote_up") {
+			$output .= esc_html__("voted up your question.","wpqa");
+		}else if ($whats_type_result["text"] == "question_vote_down") {
+			$output .= esc_html__("voted down your question.","wpqa");
+		}else if ($whats_type_result["text"] == "answer_vote_up") {
+			$output .= esc_html__("voted up you answered.","wpqa");
+		}else if ($whats_type_result["text"] == "answer_vote_down") {
+			$output .= esc_html__("voted down you answered.","wpqa");
+		}else if ($whats_type_result["text"] == "user_follow") {
+			$output .= esc_html__("followed you.","wpqa");
+		}else if ($whats_type_result["text"] == "user_unfollow") {
+			$output .= esc_html__("unfollowed you.","wpqa");
+		}else if ($whats_type_result["text"] == "point_back") {
+			$output .= esc_html__("Your point back because the best answer selected.","wpqa");
+		}else if ($whats_type_result["text"] == "select_best_answer") {
+			$output .= esc_html__("chosen your answer best answer.","wpqa");
+		}else if ($whats_type_result["text"] == "point_removed") {
+			$output .= esc_html__("Your point removed because the best answer removed.","wpqa");
+		}else if ($whats_type_result["text"] == "cancel_best_answer") {
+			$output .= esc_html__("canceled your answer best answer.","wpqa");
+		}else if ($whats_type_result["text"] == "answer_asked_question") {
+			$output .= esc_html__("answered at your asked question.","wpqa");
+		}else if ($whats_type_result["text"] == "answer_question") {
+			$output .= esc_html__("answered your question.","wpqa");
+		}else if ($whats_type_result["text"] == "answer_question_follow") {
+			$output .= esc_html__("answered your question you followed.","wpqa");
+		}else if ($whats_type_result["text"] == "add_question") {
+			$output .= esc_html__("added a new question.","wpqa");
+		}else if ($whats_type_result["text"] == "add_question_user") {
+			$output .= esc_html__("been asked you a question.","wpqa");
+		}else if ($whats_type_result["text"] == "question_favorites") {
+			$output .= esc_html__("added your question to favorites.","wpqa");
+		}else if ($whats_type_result["text"] == "question_remove_favorites") {
+			$output .= esc_html__("removed your question from favorites.","wpqa");
+		}else if ($whats_type_result["text"] == "follow_question") {
+			$output .= esc_html__("followed your question.","wpqa");
+		}else if ($whats_type_result["text"] == "unfollow_question") {
+			$output .= esc_html__("unfollowed your question.","wpqa");
+		}else if ($whats_type_result["text"] == "approved_answer") {
+			$output .= esc_html__("The administrator approved your answer.","wpqa");
+		}else if ($whats_type_result["text"] == "approved_comment") {
+			$output .= esc_html__("The administrator approved your comment.","wpqa");
+		}else if ($whats_type_result["text"] == "approved_question") {
+			$output .= esc_html__("The administrator approved your question.","wpqa");
+		}else if ($whats_type_result["text"] == "approved_message") {
+			$output .= "<a href='".esc_url(wpqa_get_profile_permalink(get_current_user_id(),"messages"))."'>".esc_html__("The administrator approved your message.","wpqa")."</a>";
+		}else if ($whats_type_result["text"] == "answer_review") {
+			$output .= esc_html__("The administrator review your answer.","wpqa");
+		}else if ($whats_type_result["text"] == "question_review") {
+			$output .= esc_html__("The administrator review your question.","wpqa");
+		}else if ($whats_type_result["text"] == "approved_post") {
+			$output .= esc_html__("The administrator approved your post.","wpqa");
+		}else if ($whats_type_result["text"] == "action_comment") {
+			$output .= sprintf(esc_html__("The administrator %s your %s.","wpqa"),$whats_type_result["more_text"],(isset($whats_type_result["type_of_item"]) && $whats_type_result["type_of_item"] == "answer"?esc_html__("answer","wpqa"):esc_html__("comment","wpqa")));
+		}else if ($whats_type_result["text"] == "action_post") {
+			$output .= sprintf(esc_html__("The administrator %s your %s.","wpqa"),$whats_type_result["more_text"],(isset($whats_type_result["type_of_item"]) && $whats_type_result["type_of_item"] == "question"?esc_html__("question","wpqa"):esc_html__("post","wpqa")));
+		}else if ($whats_type_result["text"] == "delete_reason") {
+			$output .= sprintf(esc_html__("The administrator reason: %s.","wpqa"),$whats_type_result["more_text"]);
+		}else if ($whats_type_result["text"] == "delete_question" || $whats_type_result["text"] == "delete_post") {
+			if (isset($whats_type_result["type_of_item"]) && $whats_type_result["type_of_item"] == "question") {
+				$output .= esc_html__("Your question was deleted.","wpqa");
 			}else {
-				$output .= $whats_type_result["text"];
+				$output .= esc_html__("Your post was deleted.","wpqa");
 			}
-			if ((!empty($whats_type_result["post_id"]) && !empty($whats_type_result["comment_id"]) && $get_post_status != "trash" && isset($get_comment) && $get_comment->comment_approved != "spam" && $get_comment->comment_approved != "trash") || (!empty($whats_type_result["post_id"]) && empty($whats_type_result["comment_id"]) && $get_post_status != "trash" && isset($get_the_permalink) && $get_the_permalink != "")) {
+		}else if ($whats_type_result["text"] == "delete_answer" || $whats_type_result["text"] == "delete_comment") {
+			if (isset($whats_type_result["type_of_item"]) && $whats_type_result["type_of_item"] == "answer") {
+				$output .= esc_html__("Your answer was deleted.","wpqa");
+			}else {
+				$output .= esc_html__("Your comment was deleted.","wpqa");
+			}
+		}else if ($whats_type_result["text"] == "add_message_user") {
+			$output .= "<a href='".esc_url(wpqa_get_profile_permalink(get_current_user_id(),"messages"))."'>".esc_html__("sent a message for you.","wpqa")."</a>";
+		}else if ($whats_type_result["text"] == "seen_message") {
+			$output .= esc_html__("seen your message.","wpqa");
+		}else {
+			$output .= $whats_type_result["text"];
+		}
+		if ((!empty($whats_type_result["post_id"]) && !empty($whats_type_result["comment_id"]) && $get_post_status != "trash" && isset($get_comment) && $get_comment->comment_approved != "spam" && $get_comment->comment_approved != "trash") || (!empty($whats_type_result["post_id"]) && empty($whats_type_result["comment_id"]) && $get_post_status != "trash" && isset($get_the_permalink) && $get_the_permalink != "")) {
 			$output .= '</a>';
 		}
 		if (!empty($whats_type_result["post_id"]) && !empty($whats_type_result["comment_id"])) {
@@ -963,91 +965,91 @@ if (!function_exists('wpqa_show_activities')) :
 		if (!empty($whats_type_result["post_id"]) && empty($whats_type_result["comment_id"]) && $get_post_status != "trash" && isset($get_the_permalink) && $get_the_permalink != "") {
 			$output .= '<a href="'.esc_url($get_the_permalink).'">';
 		}
+
+		if ($whats_type_result["text"] == "poll_question") {
+			$output .= esc_html__("Poll at question","wpqa");
+		}else if ($whats_type_result["text"] == "question_vote_up") {
+			$output .= esc_html__("Voted up question.","wpqa");
+		}else if ($whats_type_result["text"] == "question_vote_down") {
+			$output .= esc_html__("Voted down question.","wpqa");
+		}else if ($whats_type_result["text"] == "answer_vote_up") {
+			$output .= esc_html__("Voted up answer.","wpqa");
+		}else if ($whats_type_result["text"] == "answer_vote_down") {
+			$output .= esc_html__("Voted down answer.","wpqa");
+		}else if ($whats_type_result["text"] == "user_follow") {
+			$output .= esc_html__("You have followed","wpqa");
+		}else if ($whats_type_result["text"] == "user_unfollow") {
+			$output .= esc_html__("You have unfollowed","wpqa");
+		}else if ($whats_type_result["text"] == "bump_question") {
+			$output .= esc_html__("You have bumped your question.","wpqa");
+		}else if ($whats_type_result["text"] == "report_question") {
+			$output .= esc_html__("You have reported a question.","wpqa");
+		}else if ($whats_type_result["text"] == "report_answer") {
+			$output .= esc_html__("You have reported an answer.","wpqa");
+		}else if ($whats_type_result["text"] == "select_best_answer") {
+			$output .= esc_html__("You have chosen the best answer.","wpqa");
+		}else if ($whats_type_result["text"] == "cancel_best_answer") {
+			$output .= esc_html__("You have canceled the best answer.","wpqa");
+		}else if ($whats_type_result["text"] == "closed_question") {
+			$output .= esc_html__("You have closed the question.","wpqa");
+		}else if ($whats_type_result["text"] == "opend_question") {
+			$output .= esc_html__("You have opend the question.","wpqa");
+		}else if ($whats_type_result["text"] == "follow_question") {
+			$output .= esc_html__("You have followed the question.","wpqa");
+		}else if ($whats_type_result["text"] == "unfollow_question") {
+			$output .= esc_html__("You have unfollowed the question.","wpqa");
+		}else if ($whats_type_result["text"] == "question_favorites") {
+			$output .= esc_html__("You have added a question at favorites.","wpqa");
+		}else if ($whats_type_result["text"] == "question_remove_favorites") {
+			$output .= esc_html__("You have removed a question from favorites.","wpqa");
+		}else if ($whats_type_result["text"] == "add_answer") {
+			$output .= esc_html__("You have added an answer.","wpqa");
+		}else if ($whats_type_result["text"] == "add_comment") {
+			$output .= esc_html__("You have added a comment.","wpqa");
+		}else if ($whats_type_result["text"] == "approved_answer") {
+			$output .= esc_html__("Your answere is pending for review.","wpqa");
+		}else if ($whats_type_result["text"] == "approved_comment") {
+			$output .= esc_html__("Your comment is pending for review.","wpqa");
+		}else if ($whats_type_result["text"] == "add_question") {
+			$output .= esc_html__("Added a new question.","wpqa");
+		}else if ($whats_type_result["text"] == "add_post") {
+			$output .= esc_html__("Add a new post.","wpqa");
+		}else if ($whats_type_result["text"] == "approved_question") {
+			$output .= esc_html__("Your question is pending for review.","wpqa");
+		}else if ($whats_type_result["text"] == "approved_message") {
+			$output .= esc_html__("Your message is pending for review.","wpqa");
+		}else if ($whats_type_result["text"] == "approved_post") {
+			$output .= esc_html__("Your post is pending for review.","wpqa");
+		}else if ($whats_type_result["text"] == "delete_question") {
+			$output .= esc_html__("You have deleted a question.","wpqa");
+		}else if ($whats_type_result["text"] == "delete_post") {
+			$output .= esc_html__("You have deleted a post.","wpqa");
+		}else if ($whats_type_result["text"] == "delete_answer") {
+			$output .= esc_html__("You have deleted an answer.","wpqa");
+		}else if ($whats_type_result["text"] == "delete_comment") {
+			$output .= esc_html__("You have deleted a comment.","wpqa");
+		}else if ($whats_type_result["text"] == "add_message") {
+			$output .= esc_html__("You have sent a message for","wpqa");
 			
-			if ($whats_type_result["text"] == "poll_question") {
-				$output .= esc_html__("Poll at question","wpqa");
-			}else if ($whats_type_result["text"] == "question_vote_up") {
-				$output .= esc_html__("Voted up question.","wpqa");
-			}else if ($whats_type_result["text"] == "question_vote_down") {
-				$output .= esc_html__("Voted down question.","wpqa");
-			}else if ($whats_type_result["text"] == "answer_vote_up") {
-				$output .= esc_html__("Voted up answer.","wpqa");
-			}else if ($whats_type_result["text"] == "answer_vote_down") {
-				$output .= esc_html__("Voted down answer.","wpqa");
-			}else if ($whats_type_result["text"] == "user_follow") {
-				$output .= esc_html__("You have followed","wpqa");
-			}else if ($whats_type_result["text"] == "user_unfollow") {
-				$output .= esc_html__("You have unfollowed","wpqa");
-			}else if ($whats_type_result["text"] == "bump_question") {
-				$output .= esc_html__("You have bumped your question.","wpqa");
-			}else if ($whats_type_result["text"] == "report_question") {
-				$output .= esc_html__("You have reported a question.","wpqa");
-			}else if ($whats_type_result["text"] == "report_answer") {
-				$output .= esc_html__("You have reported an answer.","wpqa");
-			}else if ($whats_type_result["text"] == "select_best_answer") {
-				$output .= esc_html__("You have chosen the best answer.","wpqa");
-			}else if ($whats_type_result["text"] == "cancel_best_answer") {
-				$output .= esc_html__("You have canceled the best answer.","wpqa");
-			}else if ($whats_type_result["text"] == "closed_question") {
-				$output .= esc_html__("You have closed the question.","wpqa");
-			}else if ($whats_type_result["text"] == "opend_question") {
-				$output .= esc_html__("You have opend the question.","wpqa");
-			}else if ($whats_type_result["text"] == "follow_question") {
-				$output .= esc_html__("You have followed the question.","wpqa");
-			}else if ($whats_type_result["text"] == "unfollow_question") {
-				$output .= esc_html__("You have unfollowed the question.","wpqa");
-			}else if ($whats_type_result["text"] == "question_favorites") {
-				$output .= esc_html__("You have added a question at favorites.","wpqa");
-			}else if ($whats_type_result["text"] == "question_remove_favorites") {
-				$output .= esc_html__("You have removed a question from favorites.","wpqa");
-			}else if ($whats_type_result["text"] == "add_answer") {
-				$output .= esc_html__("You have added an answer.","wpqa");
-			}else if ($whats_type_result["text"] == "add_comment") {
-				$output .= esc_html__("You have added a comment.","wpqa");
-			}else if ($whats_type_result["text"] == "approved_answer") {
-				$output .= esc_html__("Your answere is pending for review.","wpqa");
-			}else if ($whats_type_result["text"] == "approved_comment") {
-				$output .= esc_html__("Your comment is pending for review.","wpqa");
-			}else if ($whats_type_result["text"] == "add_question") {
-				$output .= esc_html__("Added a new question.","wpqa");
-			}else if ($whats_type_result["text"] == "add_post") {
-				$output .= esc_html__("Add a new post.","wpqa");
-			}else if ($whats_type_result["text"] == "approved_question") {
-				$output .= esc_html__("Your question is pending for review.","wpqa");
-			}else if ($whats_type_result["text"] == "approved_message") {
-				$output .= esc_html__("Your message is pending for review.","wpqa");
-			}else if ($whats_type_result["text"] == "approved_post") {
-				$output .= esc_html__("Your post is pending for review.","wpqa");
-			}else if ($whats_type_result["text"] == "delete_question") {
-				$output .= esc_html__("You have deleted a question.","wpqa");
-			}else if ($whats_type_result["text"] == "delete_post") {
-				$output .= esc_html__("You have deleted a post.","wpqa");
-			}else if ($whats_type_result["text"] == "delete_answer") {
-				$output .= esc_html__("You have deleted an answer.","wpqa");
-			}else if ($whats_type_result["text"] == "delete_comment") {
-				$output .= esc_html__("You have deleted a comment.","wpqa");
-			}else if ($whats_type_result["text"] == "add_message") {
-				$output .= esc_html__("You have sent a message for","wpqa");
-			
-				if (!empty($whats_type_result["another_user_id"]) || !empty($whats_type_result["username"])) {
-					if (isset($display_name) && $display_name != "") {
-						if (!empty($whats_type_result["another_user_id"])) {
-							$output .= ' <a href="'.esc_url($wpqa_profile_url).'">'.esc_html($display_name).'</a>.';
-						}
-						if (!empty($whats_type_result["username"])) {
-							$output .= esc_html($whats_type_result["username"]).".";
-						}
-					}else {
-						$output .= esc_html__("Delete user","wpqa").".";
+			if (!empty($whats_type_result["another_user_id"]) || !empty($whats_type_result["username"])) {
+				if (isset($display_name) && $display_name != "") {
+					if (!empty($whats_type_result["another_user_id"])) {
+						$output .= ' <a href="'.esc_url($wpqa_profile_url).'">'.esc_html($display_name).'</a>.';
 					}
+					if (!empty($whats_type_result["username"])) {
+						$output .= esc_html($whats_type_result["username"]).".";
+					}
+				}else {
+					$output .= esc_html__("Delete user","wpqa").".";
 				}
-			}else if ($whats_type_result["text"] == "delete_inbox_message") {
-				$output .= esc_html__("You have deleted your inbox message","wpqa");
-			}else if ($whats_type_result["text"] == "delete_send_message") {
-				$output .= esc_html__("You have deleted your sent message","wpqa");
-			}else {
-				$output .= $whats_type_result["text"];
 			}
+		}else if ($whats_type_result["text"] == "delete_inbox_message") {
+			$output .= esc_html__("You have deleted your inbox message","wpqa");
+		}else if ($whats_type_result["text"] == "delete_send_message") {
+			$output .= esc_html__("You have deleted your sent message","wpqa");
+		}else {
+			$output .= $whats_type_result["text"];
+		}
 		if ((!empty($whats_type_result["post_id"]) && !empty($whats_type_result["comment_id"]) && $get_post_status != "trash" && isset($get_comment) && $get_comment->comment_approved != "spam" && $get_comment->comment_approved != "trash") || (!empty($whats_type_result["post_id"]) && empty($whats_type_result["comment_id"]) && $get_post_status != "trash" && isset($get_the_permalink) && $get_the_permalink != "")) {
 			$output .= '</a>';
 		}
@@ -1158,9 +1160,9 @@ if (!function_exists('wpqa_comments')) :
 								<span class="span-icon">
 									<?php if ($comment->user_id > 0) {?>
 										<a href="<?php echo esc_url($user_profile_page)?>">
-									<?php }
+										<?php }
 										echo wpqa_get_user_avatar(array("user_id" => ($comment->user_id > 0?$comment->user_id:$comment->comment_author_email),"size" => 25,"user_name" => $comment->comment_author));
-									if ($comment->user_id > 0) {?>
+										if ($comment->user_id > 0) {?>
 										</a>
 									<?php }?>
 								</span>
@@ -1176,7 +1178,7 @@ if (!function_exists('wpqa_comments')) :
 								<?php }?>
 							</div>
 						</li>
-					    <?php
+						<?php
 					}?>
 				</ul>
 			</div>
@@ -1348,580 +1350,580 @@ if (!function_exists('wpqa_posts')) :
 		$out = '';
 		if ($related_query->have_posts()) :
 			$out .= '<div class="user-notifications user-profile-area'.($post_style == "style_2"?" widget-post-style-2".($display_image == "on"?" post-style-2-image":""):"").'">
-				<div>
-					<ul>';
-						while ( $related_query->have_posts() ) : $related_query->the_post();
-							$what_post = get_post_meta($post->ID,'what_post',true);
-							$video_type = get_post_meta($post->ID,'video_post_type',true);
-							$out .= '<li class="widget-posts-';if (is_sticky()) {$out .= 'sticky';}else if ($what_post == "google") {$out .= 'google';}else if ($what_post == "audio") {$out .= 'volume-up';}else if ($what_post == "video") {if ($video_type == 'youtube') {$out .= 'youtube';}else if ($video_type == 'vimeo') {$out .= 'vimeo';}else if ($video_type == 'daily' || $video_type == 'embed' || $video_type == 'html5' || $video_type == 'facebook') {$out .= 'daily';}}else if ($what_post == "slideshow") {$out .= 'slideshow';}else if ($what_post == "quote") {$out .= 'quote';}else if ($what_post == "link") {$out .= 'link';}else if ($what_post == "soundcloud") {$out .= 'soundcloud';}else if ($what_post == "twitter") {$out .= 'twitter';}else if ($what_post == "facebook") {$out .= 'facebook';}else if ($what_post == "instagram") {$out .= 'instagram';}else {if (has_post_thumbnail()) {$out .= 'image';}else {$out .= 'text';}}$out .= (has_post_thumbnail()?'':' widget-no-img').($display_comment || ($post_style == "style_2" && $display_date == "on")?'':' widget-no-meta').'">';
-								$video_description = get_post_meta($post->ID,"video_description",true);
-								if ($post_style == "style_2" && $display_video == "on" && ($what_post == "video" || $video_description == "on")) {
-									if ($post_or_question == "question") {
-										$ask_question_items = wpqa_options("ask_question_items");
-										$video_desc_active = (isset($ask_question_items["video_desc_active"]["value"]) && $ask_question_items["video_desc_active"]["value"] == "video_desc_active"?"on":"");
-										if ($video_desc_active == "on" && $video_description == "on") {
-											$video_desc = get_post_meta($post->ID,'video_desc',true);
-											$video_id = get_post_meta($post->ID,"video_id",true);
-											$video_type = get_post_meta($post->ID,"video_type",true);
-											if ($video_id != "") {
-												if ($video_type == 'youtube') {
-													$type = "https://www.youtube.com/embed/".$video_id;
-												}else if ($video_type == 'vimeo') {
-													$type = "https://player.vimeo.com/video/".$video_id;
-												}else if ($video_type == 'daily') {
-													$type = "https://www.dailymotion.com/embed/video/".$video_id;
-												}else if ($video_type == 'facebook') {
-													$type = "https://www.facebook.com/video/embed?video_id=".$video_id;
-												}
-												$las_video = '<iframe frameborder="0" allowfullscreen height="155" src="'.$type.'"></iframe>';
-												$out .= '<div class="question-video-widget">'.$las_video.'</div>';
-											}
-										}
-									}else if ($what_post == "video") {
-										$video_id = get_post_meta($post->ID,wpqa_meta.'video_post_id',true);
-										if ($video_type == 'youtube') {
-											$type = "https://www.youtube.com/embed/".$video_id;
-										}else if ($video_type == 'vimeo') {
-											$type = "https://player.vimeo.com/video/".$video_id;
-										}else if ($video_type == 'daily') {
-											$type = "https://www.dailymotion.com/embed/video/".$video_id;
-										}else if ($video_type == 'facebook') {
-											$type = "https://www.facebook.com/video/embed?video_id=".$video_id;
-										}
-										$video_mp4 = get_post_meta($post->ID,wpqa_meta."video_mp4",true);
-										$video_m4v = get_post_meta($post->ID,wpqa_meta."video_m4v",true);
-										$video_webm = get_post_meta($post->ID,wpqa_meta."video_webm",true);
-										$video_ogv = get_post_meta($post->ID,wpqa_meta."video_ogv",true);
-										$video_wmv = get_post_meta($post->ID,wpqa_meta."video_wmv",true);
-										$video_flv = get_post_meta($post->ID,wpqa_meta."video_flv",true);
-										$video_image = get_post_meta($post->ID,wpqa_meta."video_image",true);
-										$video_mp4 = (isset($video_mp4) && $video_mp4 != ""?" mp4='".$video_mp4."'":"");
-										$video_m4v = (isset($video_m4v) && $video_m4v != ""?" m4v='".$video_m4v."'":"");
-										$video_webm = (isset($video_webm) && $video_webm != ""?" webm='".$video_webm."'":"");
-										$video_ogv = (isset($video_ogv) && $video_ogv != ""?" ogv='".$video_ogv."'":"");
-										$video_wmv = (isset($video_wmv) && $video_wmv != ""?" wmv='".$video_wmv."'":"");
-										$video_flv = (isset($video_flv) && $video_flv != ""?" flv='".$video_flv."'":"");
-										$video_image = (isset($video_image) && $video_image != ""?" poster='".wpqa_image_url_id($video_image)."'":"");
-										if ($video_type == "html5") {
-											$out .= do_shortcode('[video'.$video_mp4.$video_m4v.$video_webm.$video_ogv.$video_wmv.$video_flv.$video_image.']');
-										}else if ($video_type == "embed") {
-											$out .= get_post_meta($post->ID,"custom_embed",true);
-										}else if (isset($type) && $type != "") {
-											$las_video = '<iframe frameborder="0" allowfullscreen height="155" src="'.$type.'"></iframe>';
-											$out .= '<div class="question-video-widget">'.$las_video.'</div>';
-										}
-									}
-								}else if ($post_style == "style_2" && $display_image == "on") {
-									$out .= '<div class="widget-post-image"><a href="'.get_permalink().'" title="'.sprintf('%s', the_title_attribute('echo=0')).'" rel="bookmark">';
-									$img_width = "229";
-									$img_height = "155";
-									if (has_post_thumbnail()) {
-										$out .= apply_filters("wpqa_filter_image_widget",wpqa_get_aq_resize_img($img_width,$img_height),$post,$img_width,$img_height);
-									}else {
-										$wpqa_image = wpqa_image();
-										if (!is_single() && !empty($wpqa_image)) {
-											$out .= "<img alt='".get_the_title()."' src='".wpqa_get_aq_resize_url(wpqa_image(),$img_width,$img_height)."'>";
-										}
-									}
-									$out .= '</a></div>';
+			<div>
+			<ul>';
+			while ( $related_query->have_posts() ) : $related_query->the_post();
+				$what_post = get_post_meta($post->ID,'what_post',true);
+				$video_type = get_post_meta($post->ID,'video_post_type',true);
+				$out .= '<li class="widget-posts-';if (is_sticky()) {$out .= 'sticky';}else if ($what_post == "google") {$out .= 'google';}else if ($what_post == "audio") {$out .= 'volume-up';}else if ($what_post == "video") {if ($video_type == 'youtube') {$out .= 'youtube';}else if ($video_type == 'vimeo') {$out .= 'vimeo';}else if ($video_type == 'daily' || $video_type == 'embed' || $video_type == 'html5' || $video_type == 'facebook') {$out .= 'daily';}}else if ($what_post == "slideshow") {$out .= 'slideshow';}else if ($what_post == "quote") {$out .= 'quote';}else if ($what_post == "link") {$out .= 'link';}else if ($what_post == "soundcloud") {$out .= 'soundcloud';}else if ($what_post == "twitter") {$out .= 'twitter';}else if ($what_post == "facebook") {$out .= 'facebook';}else if ($what_post == "instagram") {$out .= 'instagram';}else {if (has_post_thumbnail()) {$out .= 'image';}else {$out .= 'text';}}$out .= (has_post_thumbnail()?'':' widget-no-img').($display_comment || ($post_style == "style_2" && $display_date == "on")?'':' widget-no-meta').'">';
+				$video_description = get_post_meta($post->ID,"video_description",true);
+				if ($post_style == "style_2" && $display_video == "on" && ($what_post == "video" || $video_description == "on")) {
+					if ($post_or_question == "question") {
+						$ask_question_items = wpqa_options("ask_question_items");
+						$video_desc_active = (isset($ask_question_items["video_desc_active"]["value"]) && $ask_question_items["video_desc_active"]["value"] == "video_desc_active"?"on":"");
+						if ($video_desc_active == "on" && $video_description == "on") {
+							$video_desc = get_post_meta($post->ID,'video_desc',true);
+							$video_id = get_post_meta($post->ID,"video_id",true);
+							$video_type = get_post_meta($post->ID,"video_type",true);
+							if ($video_id != "") {
+								if ($video_type == 'youtube') {
+									$type = "https://www.youtube.com/embed/".$video_id;
+								}else if ($video_type == 'vimeo') {
+									$type = "https://player.vimeo.com/video/".$video_id;
+								}else if ($video_type == 'daily') {
+									$type = "https://www.dailymotion.com/embed/video/".$video_id;
+								}else if ($video_type == 'facebook') {
+									$type = "https://www.facebook.com/video/embed?video_id=".$video_id;
 								}
-								if ($post_style != "style_2") {
-									if ($post->post_author > 0) {
-										$user_name = get_the_author_meta("display_name",$post->post_author);
-										$user_id = $post->post_author;
-									}else {
-										$user_id = get_post_meta($post->ID,$post_or_question.'_email',true);
-										$anonymously_user     = get_post_meta($post->ID,"anonymously_user",true);
-										$anonymously_question = get_post_meta($post->ID,"anonymously_question",true);
-										if (($anonymously_question == "on" || $anonymously_question == 1) && $anonymously_user != "") {
-											$user_name = esc_html__('Anonymous','wpqa');
-										}else {
-											$user_name = get_post_meta($post->ID,$post_or_question."_username",true);
-											$user_name = ($user_name != ""?$user_name:esc_html__('Anonymous','wpqa'));
-										}
-									}
-									$user_profile_page = wpqa_profile_url($user_id);
-									if ($show_images == "on") {
-										$out .= '<span class="span-icon">';
-											if ($user_id > 0) {
-												$out .= '<a href="'.esc_url($user_profile_page).'">';
-											}
-											$out .= wpqa_get_user_avatar(array("user_id" => $user_id,"size" => 20,"user_name" => $user_name));
-											if ($user_id > 0) {
-												$out .= '</a>';
-											}
-										$out .= '</span>';
-									}
-								}
-								$out .= '<div>';
-									if ($post_style == "style_2") {
-										$sort_title_meta = array("meta","title");
-									}else {
-										$sort_title_meta = array("title","meta");
-									}
-									foreach ($sort_title_meta as $key => $value) {
-										if ($value == "title") {
-											$out .= '<h3><a href="'.get_permalink().'" title="'.sprintf('%s', the_title_attribute('echo=0')).'" rel="bookmark">'.wpqa_excerpt_title($excerpt_title,wpqa_excerpt_type,"return").'</a></h3>';
-											if ($post_style == "style_2" && $excerpt_post > 0) {
-												$out .= '<p>'.wpqa_excerpt($excerpt_post,wpqa_excerpt_type,"return").'</p>';
-											}
-										}else if ($value == "meta") {
-											if ($display_comment == "on" || ($post_style == "style_2" && $display_date == "on")) {
-												$out .= '<ul class="widget-post-meta">';
-												if ($post_style == "style_2" && $display_date == "on") {
-													$out .= '<li><span class="post-meta-date">';
-														$time_string = '<time class="entry-date published" datetime="%1$s">%2$s</time>';
-														$date_format = wpqa_options("date_format");
-														$date_format = ($date_format?$date_format:get_option("date_format"));
-														$time_string = sprintf($time_string,esc_attr(get_the_date('c')),esc_html(get_the_time($date_format)));
-														$data_string = esc_html__("On","wpqa");
-														$posted_on   = $data_string.': '.$time_string;
-														$out .= $posted_on;
-													$out .= '</span></li>';
-												}
-												if ($display_comment == "on") {
-													$out .= '<li><a class="post-meta-comment" href="'.get_comments_link().'">';
-														if ($post_style == "style_2") {
-															$comment_string = ($post_or_question == "question"?esc_html__('Answers','wpqa'):esc_html__('Comments','wpqa'));
-															$comments = $comment_string.': '.get_comments_number();
-														}else if ($post_style != "style_2") {
-															$out .= '<i class="icon-comment"></i>';
-															$num_comments = get_comments_number();
-															if ($num_comments == 0) {
-																$comments = ($post_or_question == "question"?esc_html__('0 Answers','wpqa'):esc_html__('0 Comments','wpqa'));
-															}else if ($num_comments > 1) {
-																$comments = wpqa_count_number($num_comments)." ".($post_or_question == "question"?esc_html__('Answers','wpqa'):esc_html__('Comments','wpqa'));
-															}else {
-																$comments = ($post_or_question == "question"?esc_html__('1 Answer','wpqa'):esc_html__('1 Comment','wpqa'));
-															}
-														}
-														$out .= $comments;
-													$out .= '</a></li>';
-												}
-												$out .= '</ul>';
-											}
-										}
-									}
-								$out .= '</div>
-							</li>';
-						endwhile;
-					$out .= '</ul>';
-					if ($post_or_question == "post" && $post_style == "style_2" && $blog_h_button == "on") {
-						$out .= '<div class="blog-post-button"><a href="'.esc_url(($blog_h_link != ""?$blog_h_link:($blog_h_page != "" && $blog_h_page > 0?get_page_link($blog_h_page):""))).'" class="button-default">'.($blog_h_button_text != ""?$blog_h_button_text:esc_html__("Explore Our Blog","wpqa")).'</a></div>';
+								$las_video = '<iframe frameborder="0" allowfullscreen height="155" src="'.$type.'"></iframe>';
+								$out .= '<div class="question-video-widget">'.$las_video.'</div>';
+							}
+						}
+					}else if ($what_post == "video") {
+						$video_id = get_post_meta($post->ID,wpqa_meta.'video_post_id',true);
+						if ($video_type == 'youtube') {
+							$type = "https://www.youtube.com/embed/".$video_id;
+						}else if ($video_type == 'vimeo') {
+							$type = "https://player.vimeo.com/video/".$video_id;
+						}else if ($video_type == 'daily') {
+							$type = "https://www.dailymotion.com/embed/video/".$video_id;
+						}else if ($video_type == 'facebook') {
+							$type = "https://www.facebook.com/video/embed?video_id=".$video_id;
+						}
+						$video_mp4 = get_post_meta($post->ID,wpqa_meta."video_mp4",true);
+						$video_m4v = get_post_meta($post->ID,wpqa_meta."video_m4v",true);
+						$video_webm = get_post_meta($post->ID,wpqa_meta."video_webm",true);
+						$video_ogv = get_post_meta($post->ID,wpqa_meta."video_ogv",true);
+						$video_wmv = get_post_meta($post->ID,wpqa_meta."video_wmv",true);
+						$video_flv = get_post_meta($post->ID,wpqa_meta."video_flv",true);
+						$video_image = get_post_meta($post->ID,wpqa_meta."video_image",true);
+						$video_mp4 = (isset($video_mp4) && $video_mp4 != ""?" mp4='".$video_mp4."'":"");
+						$video_m4v = (isset($video_m4v) && $video_m4v != ""?" m4v='".$video_m4v."'":"");
+						$video_webm = (isset($video_webm) && $video_webm != ""?" webm='".$video_webm."'":"");
+						$video_ogv = (isset($video_ogv) && $video_ogv != ""?" ogv='".$video_ogv."'":"");
+						$video_wmv = (isset($video_wmv) && $video_wmv != ""?" wmv='".$video_wmv."'":"");
+						$video_flv = (isset($video_flv) && $video_flv != ""?" flv='".$video_flv."'":"");
+						$video_image = (isset($video_image) && $video_image != ""?" poster='".wpqa_image_url_id($video_image)."'":"");
+						if ($video_type == "html5") {
+							$out .= do_shortcode('[video'.$video_mp4.$video_m4v.$video_webm.$video_ogv.$video_wmv.$video_flv.$video_image.']');
+						}else if ($video_type == "embed") {
+							$out .= get_post_meta($post->ID,"custom_embed",true);
+						}else if (isset($type) && $type != "") {
+							$las_video = '<iframe frameborder="0" allowfullscreen height="155" src="'.$type.'"></iframe>';
+							$out .= '<div class="question-video-widget">'.$las_video.'</div>';
+						}
 					}
-				$out .= '</div>
-			</div>';
-		else : $out .= (isset($no_query) && $no_query == "no_query"?"no_query":"");endif;
-		if ($orderby == "no_response") {
-			remove_filter("posts_where","wpqa_comments_filter");
-		}
-		wp_reset_postdata();
-		return $out;
-	}
-endif;
-/* Author */
-if (!function_exists('wpqa_author')) :
-	function wpqa_author($author_id,$author_page = "",$owner = "",$type_post = "",$widget = "",$class = "",$cover = "",$category = "") {
-		if (isset($author_id) && $author_id > 0) {
-			$follow_email = get_the_author_meta('follow_email',$author_id);
-			if (isset($follow_email) && $follow_email != "" && $follow_email != 0 && $follow_email != "on") {
-				update_user_meta($author_id,'follow_email',"on");
-				$follow_email = get_the_author_meta('follow_email',$author_id);
-			}
-			if ($cover == "") {
-				$active_points = wpqa_options("active_points");
-				
-				if ($author_page == "grid" || $author_page == "grid_pop" || $author_page == "small" || $author_page == "simple_follow" || $author_page == "columns" || $author_page == "columns_pop") {
-					/* questions */
-					$questions_count = wpqa_count_posts_by_user($author_id,"question","publish",($category !== ""?$category:0));
-					/* answers */
-					$answers_count = count(get_comments(array("post_type" => "question","status" => "approve","user_id" => $author_id)));
-					
-					/* the_best_answer */
-					$the_best_answer = count(get_comments(array('user_id' => $author_id,"status" => "approve",'post_type' => 'question',"meta_query" => array('relation' => 'AND',array("key" => "best_answer_comment","compare" => "=","value" => "best_answer_comment"),array("key" => "answer_question_user","compare" => "NOT EXISTS")))));
-					
-					/* points */
-					$points = (int)get_user_meta($author_id,"points",true);
-					
-					/* posts */
-					$posts_count = wpqa_count_posts_by_user($author_id,"post");
-					
-					/* comments */
-					$comments_count = count(get_comments(array("post_type" => "post","status" => "approve","user_id" => $author_id)));
+				}else if ($post_style == "style_2" && $display_image == "on") {
+					$out .= '<div class="widget-post-image"><a href="'.get_permalink().'" title="'.sprintf('%s', the_title_attribute('echo=0')).'" rel="bookmark">';
+					$img_width = "229";
+					$img_height = "155";
+					if (has_post_thumbnail()) {
+						$out .= apply_filters("wpqa_filter_image_widget",wpqa_get_aq_resize_img($img_width,$img_height),$post,$img_width,$img_height);
+					}else {
+						$wpqa_image = wpqa_image();
+						if (!is_single() && !empty($wpqa_image)) {
+							$out .= "<img alt='".get_the_title()."' src='".wpqa_get_aq_resize_url(wpqa_image(),$img_width,$img_height)."'>";
+						}
+					}
+					$out .= '</a></div>';
 				}
+				if ($post_style != "style_2") {
+					if ($post->post_author > 0) {
+						$user_name = get_the_author_meta("display_name",$post->post_author);
+						$user_id = $post->post_author;
+					}else {
+						$user_id = get_post_meta($post->ID,$post_or_question.'_email',true);
+						$anonymously_user     = get_post_meta($post->ID,"anonymously_user",true);
+						$anonymously_question = get_post_meta($post->ID,"anonymously_question",true);
+						if (($anonymously_question == "on" || $anonymously_question == 1) && $anonymously_user != "") {
+							$user_name = esc_html__('Anonymous','wpqa');
+						}else {
+							$user_name = get_post_meta($post->ID,$post_or_question."_username",true);
+							$user_name = ($user_name != ""?$user_name:esc_html__('Anonymous','wpqa'));
+						}
+					}
+					$user_profile_page = wpqa_profile_url($user_id);
+					if ($show_images == "on") {
+						$out .= '<span class="span-icon">';
+						if ($user_id > 0) {
+							$out .= '<a href="'.esc_url($user_profile_page).'">';
+						}
+						$out .= wpqa_get_user_avatar(array("user_id" => $user_id,"size" => 20,"user_name" => $user_name));
+						if ($user_id > 0) {
+							$out .= '</a>';
+						}
+						$out .= '</span>';
+					}
+				}
+				$out .= '<div>';
+				if ($post_style == "style_2") {
+					$sort_title_meta = array("meta","title");
+				}else {
+					$sort_title_meta = array("title","meta");
+				}
+				foreach ($sort_title_meta as $key => $value) {
+					if ($value == "title") {
+						$out .= '<h3><a href="'.get_permalink().'" title="'.sprintf('%s', the_title_attribute('echo=0')).'" rel="bookmark">'.wpqa_excerpt_title($excerpt_title,wpqa_excerpt_type,"return").'</a></h3>';
+						if ($post_style == "style_2" && $excerpt_post > 0) {
+							$out .= '<p>'.wpqa_excerpt($excerpt_post,wpqa_excerpt_type,"return").'</p>';
+						}
+					}else if ($value == "meta") {
+						if ($display_comment == "on" || ($post_style == "style_2" && $display_date == "on")) {
+							$out .= '<ul class="widget-post-meta">';
+							if ($post_style == "style_2" && $display_date == "on") {
+								$out .= '<li><span class="post-meta-date">';
+								$time_string = '<time class="entry-date published" datetime="%1$s">%2$s</time>';
+								$date_format = wpqa_options("date_format");
+								$date_format = ($date_format?$date_format:get_option("date_format"));
+								$time_string = sprintf($time_string,esc_attr(get_the_date('c')),esc_html(get_the_time($date_format)));
+								$data_string = esc_html__("On","wpqa");
+								$posted_on   = $data_string.': '.$time_string;
+								$out .= $posted_on;
+								$out .= '</span></li>';
+							}
+							if ($display_comment == "on") {
+								$out .= '<li><a class="post-meta-comment" href="'.get_comments_link().'">';
+								if ($post_style == "style_2") {
+									$comment_string = ($post_or_question == "question"?esc_html__('Answers','wpqa'):esc_html__('Comments','wpqa'));
+									$comments = $comment_string.': '.get_comments_number();
+								}else if ($post_style != "style_2") {
+									$out .= '<i class="icon-comment"></i>';
+									$num_comments = get_comments_number();
+									if ($num_comments == 0) {
+										$comments = ($post_or_question == "question"?esc_html__('0 Answers','wpqa'):esc_html__('0 Comments','wpqa'));
+									}else if ($num_comments > 1) {
+										$comments = wpqa_count_number($num_comments)." ".($post_or_question == "question"?esc_html__('Answers','wpqa'):esc_html__('Comments','wpqa'));
+									}else {
+										$comments = ($post_or_question == "question"?esc_html__('1 Answer','wpqa'):esc_html__('1 Comment','wpqa'));
+									}
+								}
+								$out .= $comments;
+								$out .= '</a></li>';
+							}
+							$out .= '</ul>';
+						}
+					}
+				}
+				$out .= '</div>
+				</li>';
+			endwhile;
+			$out .= '</ul>';
+			if ($post_or_question == "post" && $post_style == "style_2" && $blog_h_button == "on") {
+				$out .= '<div class="blog-post-button"><a href="'.esc_url(($blog_h_link != ""?$blog_h_link:($blog_h_page != "" && $blog_h_page > 0?get_page_link($blog_h_page):""))).'" class="button-default">'.($blog_h_button_text != ""?$blog_h_button_text:esc_html__("Explore Our Blog","wpqa")).'</a></div>';
 			}
-
-			$out = '<div class="post-section user-area'.($author_page == "advanced"?" user-advanced":"").($class != ""?" ".$class:"").'">
-				<div class="post-inner">';
-					if ($cover == "") {
-						if ($author_page == "advanced") {
-							$out .= '<div class="user-head-area">';
-						}
-						if ($author_page == "advanced") {
-							$message_button = wpqa_message_button($author_id,$cover,$owner);
-							$out .= $message_button;
-						}
-						
-						$out .= wpqa_get_avatar_link(array("user_id" => $author_id,"size" => ($author_page == "small"?42:($author_page == "columns" || $author_page == "columns_pop"?70:84)),"span" => "span"));
-						if ($author_page == "advanced" && (isset($message_button) && $message_button != "") && $owner == false) {
-							$out .= wpqa_following($author_id,"",$owner,"login");
-						}
-						if ($author_page == "advanced") {
-							$out .= '</div>';
-						}
-					}
-					$author_display_name = get_the_author_meta("display_name",$author_id);
-					
-					$profile_credential = get_the_author_meta('profile_credential',$author_id);
-					$out .= '<div class="user-content">
-						<div class="user-inner">';
-							if ($author_page == "columns" || $author_page == "columns_pop") {
-								$out .= '<div class="user-data-columns">';
-							}
-							
-							if ($cover == "") {
-								$out .= '<h4><a href="'.esc_url(wpqa_profile_url($author_id)).'">'.$author_display_name.'</a>'.wpqa_verified_user($author_id).'</h4>';
-								
-								if ($profile_credential != "" && $author_page != "grid" && $author_page != "grid_pop" && $author_page != "small" && $author_page != "simple_follow" && $author_page != "columns" && $author_page != "columns_pop") {
-									$out .= '<span class="profile-credential">'.esc_html($profile_credential).'</span>';
-								}
-								
-								if ($author_page != "grid_pop" && $author_page != "small" && $author_page != "columns_pop") {
-									$active_points_category = wpqa_options("active_points_category");
-									if ($active_points_category != "on") {
-										$out .= wpqa_get_badge($author_id);
-									}
-								}
-								
-								if ($author_page == "columns_pop") {
-									$country = get_the_author_meta('country',$author_id);
-									$city    = get_the_author_meta('city',$author_id);
-									$get_countries = apply_filters('wpqa_get_countries',false);
-									if ((isset($profile_credential) && $profile_credential != "") || (isset($city) && $city != "") || (isset($country) && $country != "" && isset($get_countries[$country]))) {
-										$out .= '<div class="user-data">
-											<ul>';
-												if (isset($profile_credential) && $profile_credential != "") {
-													$out .= '<li class="profile-credential">
-														'.(isset($profile_credential) && $profile_credential != ""?esc_html($profile_credential):"").'
-													</li>';
-												}else if ((isset($city) && $city != "") || (isset($country) && $country != "" && isset($get_countries[$country]))) {
-													$out .= '<li class="city-country">
-														<i class="icon-location"></i>
-														'.(isset($city) && $city != ""?esc_html($city).", ":"").(isset($country) && $country != "" && isset($get_countries[$country])?$get_countries[$country]:"").'
-													</li>';
-												}
-											$out .= '</ul>
-										</div>';
-									}
-								}
-								
-								if ($author_page == "columns" || $author_page == "columns_pop") {
-									$out .= '</div>';
-								}
-							}
-							
-							if ($author_page != "grid" && $author_page != "grid_pop" && $author_page != "small" && $author_page != "simple_follow" && $author_page != "columns" && $author_page != "columns_pop") {
-								$the_author_meta_description = get_the_author_meta("description",$author_id);
-								if ($the_author_meta_description != "") {
-									$out .= '<p>'.($the_author_meta_description).'</p>';
-								}
-							}
-							
-							if ($author_page == "advanced") {
-								/* user data */
-								$country            = get_the_author_meta('country',$author_id);
-								$city               = get_the_author_meta('city',$author_id);
-								$profile_credential = get_the_author_meta('profile_credential',$author_id);
-								$age                = get_the_author_meta('age',$author_id);
-								$phone              = get_the_author_meta('phone',$author_id);
-								$url                = get_the_author_meta('url',$author_id);
-								$gender             = get_the_author_meta('gender',$author_id);
-								if ((isset($profile_credential) && $profile_credential != "") || (isset($city) && $city != "") || (isset($country) && $country != "") || (isset($phone) && $phone != "") || (isset($url) && $url != "") || (isset($gender) && $gender != "") || (isset($age) && $age != "")) {
-									$out .= '<div class="user-data">
-										<ul>';
-											$get_countries = apply_filters('wpqa_get_countries',false);
-											if ((isset($city) && $city != "") || (isset($country) && $country != "" && isset($get_countries[$country]))) {
-												$out .= '<li class="city-country">
-													<i class="icon-location"></i>
-													'.(isset($city) && $city != ""?$city.", ":"").(isset($country) && $country != "" && isset($get_countries[$country])?$get_countries[$country]:"").'
-												</li>';
-											}
-											if (isset($phone) && $phone != "") {
-												$out .= '<li class="user-phone">
-													<i class="icon-phone"></i>
-													'.esc_attr($phone).'
-												</li>';
-											}
-											if (isset($url) && $url != "") {
-												$out .= '<li class="user-url">
-													<a href="'.esc_url($url).'">
-														<i class="icon-link"></i>
-														'.esc_html__("Visit site","wpqa").'
-													</a>
-												</li>';
-											}
-											if (isset($gender) && $gender != "") {
-												$out .= '<li class="user-gender">
-													<i class="icon-heart"></i>
-													'.($gender == "male" || $gender == 1?esc_html__("Male","wpqa"):"").($gender == "female" || $gender == 2?esc_html__("Female","wpqa"):"").($gender == "other" || $gender == 3?esc_html__("Other","wpqa"):"").'
-												</li>';
-											}
-											if (isset($age) && $age != "") {
-												$age = (date_create($age)?date_diff(date_create($age),date_create('today'))->y:"");
-												$out .= '<li class="user-age">
-													<i class="icon-globe"></i>
-													'.esc_attr($age)." ".esc_html__("years old","wpqa").'
-												</li>';
-											}
-										$out .= '</ul>
-									</div><!-- End user-data -->';
-								}
-							}
-							
-							if ($author_page == "grid" || $author_page == "grid_pop" || $author_page == "small" || $author_page == "simple_follow") {
-								$out .= '<div class="user-data">
-									<ul>';
-										if ($type_post == "post") {
-											$out .= '<li class="user-posts">
-												<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"posts")).'">
-													'.($widget == 'widget'?'':'<i class="icon-book-open"></i>').'
-													'.wpqa_count_number($posts_count).' '.esc_html__("Posts","wpqa").'
-												</a>
-											</li>
-											<li class="user-comments">
-												<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"comments")).'">
-													'.($widget == 'widget'?'':'<i class="icon-comment"></i>').'
-													'.wpqa_count_number($comments_count).' '.esc_html__("Comments","wpqa").'
-												</a>
-											</li>';
-										}else {
-											$out .= '<li class="user-questions">
-												<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"questions")).'">
-													'.($widget == 'widget'?'':'<i class="icon-book-open"></i>').'
-													'.wpqa_count_number($questions_count).' '.esc_html__("Questions","wpqa").'
-												</a>
-											</li>';
-											if ($type_post == "the_best_answer") {
-												$out .= '<li class="user-best-answers">
-													<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"best_answers")).'">
-														'.($widget == 'widget'?'':'<i class="icon-graduation-cap"></i>').'
-														'.($the_best_answer == ""?0:wpqa_count_number($the_best_answer)).' '.esc_html__("Best Answers","wpqa").'
-													</a>
-												</li>';
-											}else if ($type_post == "points" && $active_points == "on") {
-												$out .= '<li class="user-points">
-													<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"points")).'">
-														'.($widget == 'widget'?'':'<i class="icon-bucket"></i>').'
-														'.($points == ""?0:wpqa_count_number($points)).' '.esc_html__("Points","wpqa").'
-													</a>
-												</li>';
-											}else {
-												$out .= '<li class="user-answers">
-													<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"answers")).'">
-														'.($widget == 'widget'?'':'<i class="icon-comment"></i>').'
-														'.wpqa_count_number($answers_count).' '.esc_html__("Answers","wpqa").'
-													</a>
-												</li>';
-											}
-										}
-									$out .= '</ul>
-								</div><!-- End user-data -->';
-								
-								if ($widget == "widget") {
-									$points_category_user = ($category !== ""?(int)get_user_meta($author_id,"points_category".$category,true):"");
-									if ($category !== "") {
-										$out .= apply_filters("wpqa_widget_before_badge",false,$category);
-									}
-									$out .= wpqa_get_badge($author_id,"",($points_category_user !== ""?$points_category_user:""));
-								}
-							}
-							
-							if ($author_page == "simple_follow" && $owner == false) {
-								$out .= wpqa_following($author_id,"",$owner);
-							}
-						$out .= '</div>';
-						
-						if ($author_page != "grid" && $author_page != "grid_pop" && $author_page != "small" && $author_page != "simple_follow" && $author_page != "columns" && $author_page != "columns_pop") {
-							$twitter = get_the_author_meta('twitter',$author_id);
-							$facebook = get_the_author_meta('facebook',$author_id);
-							$linkedin = get_the_author_meta('linkedin',$author_id);
-							$youtube = get_the_author_meta('youtube',$author_id);
-							$vimeo = get_the_author_meta('vimeo',$author_id);
-							$pinterest = get_the_author_meta('pinterest',$author_id);
-							$instagram = get_the_author_meta('instagram',$author_id);
-							$user_email = get_the_author_meta('email',$author_id);
-							if (($user_email && isset($follow_email) && $follow_email == "on") || $facebook || $twitter || $linkedin || $youtube || $vimeo || $pinterest || $instagram || ($cover == "" && (!isset($message_button) || (isset($message_button) && $message_button == "")))) {
-								$out .= '<div class="social-ul">
-									<ul>';
-										if ($author_page != "single-author" && ($cover == "" && (!isset($message_button) || (isset($message_button) && $message_button == ""))) && $owner == false) {
-											$out .= '<li class="social-follow">'.wpqa_following($author_id,"style_3",$owner).'</li>';
-										}
-										if ($facebook) {
-											$out .= '<li class="social-facebook"><a title="Facebook" class="tooltip-n" href="'.esc_url($facebook).'" target="_blank"><i class="icon-facebook"></i></a></li>';
-										}
-										if ($twitter) {
-											$out .= '<li class="social-twitter"><a title="Twitter" class="tooltip-n" href="'.esc_url($twitter).'" target="_blank"><i class="icon-twitter"></i></a></li>';
-										}
-										if ($linkedin) {
-											$out .= '<li class="social-linkedin"><a title="Linkedin" class="tooltip-n" href="'.esc_url($linkedin).'" target="_blank"><i class="icon-linkedin"></i></a></li>';
-										}
-										if ($pinterest) {
-											$out .= '<li class="social-pinterest"><a title="Pinterest" class="tooltip-n" href="'.esc_url($pinterest).'" target="_blank"><i class="icon-pinterest"></i></a></li>';
-										}
-										if ($instagram) {
-											$out .= '<li class="social-instagram"><a title="Instagram" class="tooltip-n" href="'.esc_url($instagram).'" target="_blank"><i class="icon-instagrem"></i></a></li>';
-										}
-										if ($youtube) {
-											$out .= '<li class="social-youtube"><a title="Youtube" class="tooltip-n" href="'.esc_url($youtube).'" target="_blank"><i class="icon-play"></i></a></li>';
-										}
-										if ($vimeo) {
-											$out .= '<li class="social-vimeo"><a title="Vimeo" class="tooltip-n" href="'.esc_url($vimeo).'" target="_blank"><i class="icon-vimeo"></i></a></li>';
-										}
-										if ($user_email && isset($follow_email) && $follow_email == "on") {
-											$out .= '<li class="social-email"><a title="'.esc_html__("Email","wpqa").'" class="tooltip-n" href="mailto:'.esc_attr($user_email).'" target="_blank" rel="nofollow"><i class="icon-mail"></i></a></li>';
-										}
-									$out .= '</ul>
-								</div><!-- End social-ul -->';
-							}
-						}
-					$out .= '</div><!-- End user-content -->';
-					
-					if ($author_page == "grid_pop" && $owner == false) {
-						$out .= wpqa_following($author_id,"",$owner);
-					}
-					
-					if ($cover == "" && $owner == false && $author_page != "grid" && $author_page != "grid_pop" && $author_page != "small" && $author_page != "simple_follow" && $author_page != "columns" && $author_page != "columns_pop") {
-						$ask_question_to_users = wpqa_options("ask_question_to_users");
-						$breadcrumbs = wpqa_options("breadcrumbs");
-						if ($ask_question_to_users == "on" && $breadcrumbs != "on") {
-							$out .= '<div class="ask-question ask-user-after-social"><a href="'.esc_url(wpqa_add_question_permalink("user")).'" class="button-default ask-question-user">'.esc_html__("Ask","wpqa")." ".$author_display_name.'</a></div>';
-						}
-					}
-					
-					if ($author_page == "columns" || $author_page == "columns_pop") {
-						$out .= '<div class="user-columns-data">
-							<ul>';
-								if ($type_post == "post") {
-									$out .= '<li class="user-columns-posts">
-										<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"posts")).'">
-											<i class="icon-book-open"></i>'.($posts_count == ""?0:wpqa_count_number($posts_count)).' '.esc_html__("Posts","wpqa").'
-										</a>
-									</li>
-									<li class="user-columns-comments">
-										<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"comments")).'">
-											<i class="icon-comment"></i>'.($comments_count == ""?0:wpqa_count_number($comments_count)).' '.esc_html__("Comments","wpqa").'
-										</a>
-									</li>';
-								}else {
-									$out .= '<li class="user-columns-questions">
-										<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"questions")).'">
-											<i class="icon-book-open"></i>'.($questions_count == ""?0:wpqa_count_number($questions_count)).' '.esc_html__("Questions","wpqa").'
-										</a>
-									</li>
-									<li class="user-columns-answers">
-										<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"answers")).'">
-											<i class="icon-comment"></i>'.($answers_count == ""?0:wpqa_count_number($answers_count)).' '.esc_html__("Answers","wpqa").'
-										</a>
-									</li>';
-								}
-								$out .= '<li class="user-columns-best-answers">
-									<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"best_answers")).'">
-										<i class="icon-graduation-cap"></i>'.($the_best_answer == ""?0:wpqa_count_number($the_best_answer)).' '.esc_html__("Best Answers","wpqa").'
-									</a>
-								</li>';
-								if ($active_points == "on") {
-									$out .= '<li class="user-columns-points">
-										<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"points")).'">
-											<i class="icon-bucket"></i>'.($points == ""?0:wpqa_count_number($points)).' '.esc_html__("Points","wpqa").'
-										</a>
-									</li>';
-								}
-							$out .= '</ul>
-						</div><!-- End user-columns-data -->';
-
-						$out .= '<div class="user-follow-profile">';
-							if ($owner == false) {
-								$out .= wpqa_following($author_id,"style_2",$owner);
-							}
-							$out .= '<a href="'.wpqa_profile_url($author_id).'">'.esc_html__("View Profile","wpqa").'</a>
-						</div><!-- End user-follow-profile -->';
-					}
-					
-					$out .= '<div class="clearfix"></div>
-				</div><!-- End post-inner -->
-			</div><!-- End post -->';
-			
-			if ($author_page == "grid_pop") {
-				$out .= '<div class="user-data">
-					<ul>
-						<li class="user-best-answers">
-							<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"best_answers")).'">
-								<i class="icon-graduation-cap"></i>
-								'.($the_best_answer == ""?0:wpqa_count_number($the_best_answer)).' '.esc_html__("Best Answers","wpqa").'
-							</a>
-						</li>';
-						if ($active_points == "on") {
-							$out .= '<li class="user-points">
-								<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"points")).'">
-									<i class="icon-bucket"></i>
-									'.($points == ""?0:wpqa_count_number($points)).' '.esc_html__("Points","wpqa").'
-								</a>
-							</li>';
-						}
-					$out .= '</ul>
-				</div><!-- End user-data -->';
+			$out .= '</div>
+			</div>';
+			else : $out .= (isset($no_query) && $no_query == "no_query"?"no_query":"");endif;
+			if ($orderby == "no_response") {
+				remove_filter("posts_where","wpqa_comments_filter");
 			}
-			
+			wp_reset_postdata();
 			return $out;
 		}
-	}
-endif;
-/* Message button */
-if (!function_exists('wpqa_message_button')) :
-	function wpqa_message_button($author_id,$text = "",$owner = "",$return = "") {
-		$out = "";
-		$active_message = wpqa_options("active_message");
-		if ($active_message == "on" && $owner == false) {
-			$send_message_no_register = wpqa_options("send_message_no_register");
-			$received_message = esc_attr(get_the_author_meta('received_message',$author_id));
-			$get_current_user_id = get_current_user_id();
-			$block_message = esc_attr(get_the_author_meta('block_message',$get_current_user_id));
-			$user_block_message = array();
-			if (is_user_logged_in()) {
-				$user_block_message = get_user_meta($author_id,"user_block_message",true);
-			}
-			if (((!is_user_logged_in() && $send_message_no_register == "on") || (is_user_logged_in() && (empty($user_block_message) || (isset($user_block_message) && is_array($user_block_message) && !in_array($get_current_user_id,$user_block_message))) && ($block_message != "on" || is_super_admin($get_current_user_id)) && ($received_message == "" || $received_message == "on")))) {
-				$out .= '<div class="'.($text != ""?'send_message_text':'send_message_icon').'"><a href="#" title="'.esc_html__("Send Message","wpqa").'" class="wpqa-message tooltip-n'.($text != ""?' button-default':'').'">'.($text != ""?esc_html__("Message","wpqa"):'<i class="icon-mail"></i>').'</a></div>';
+	endif;
+	/* Author */
+	if (!function_exists('wpqa_author')) :
+		function wpqa_author($author_id,$author_page = "",$owner = "",$type_post = "",$widget = "",$class = "",$cover = "",$category = "") {
+			if (isset($author_id) && $author_id > 0) {
+				$follow_email = get_the_author_meta('follow_email',$author_id);
+				if (isset($follow_email) && $follow_email != "" && $follow_email != 0 && $follow_email != "on") {
+					update_user_meta($author_id,'follow_email',"on");
+					$follow_email = get_the_author_meta('follow_email',$author_id);
+				}
+				if ($cover == "") {
+					$active_points = wpqa_options("active_points");
+
+					if ($author_page == "grid" || $author_page == "grid_pop" || $author_page == "small" || $author_page == "simple_follow" || $author_page == "columns" || $author_page == "columns_pop") {
+						/* questions */
+						$questions_count = wpqa_count_posts_by_user($author_id,"question","publish",($category !== ""?$category:0));
+						/* answers */
+						$answers_count = count(get_comments(array("post_type" => "question","status" => "approve","user_id" => $author_id)));
+
+						/* the_best_answer */
+						$the_best_answer = count(get_comments(array('user_id' => $author_id,"status" => "approve",'post_type' => 'question',"meta_query" => array('relation' => 'AND',array("key" => "best_answer_comment","compare" => "=","value" => "best_answer_comment"),array("key" => "answer_question_user","compare" => "NOT EXISTS")))));
+
+						/* points */
+						$points = (int)get_user_meta($author_id,"points",true);
+
+						/* posts */
+						$posts_count = wpqa_count_posts_by_user($author_id,"post");
+
+						/* comments */
+						$comments_count = count(get_comments(array("post_type" => "post","status" => "approve","user_id" => $author_id)));
+					}
+				}
+
+				$out = '<div class="post-section user-area'.($author_page == "advanced"?" user-advanced":"").($class != ""?" ".$class:"").'">
+				<div class="post-inner">';
+				if ($cover == "") {
+					if ($author_page == "advanced") {
+						$out .= '<div class="user-head-area">';
+					}
+					if ($author_page == "advanced") {
+						$message_button = wpqa_message_button($author_id,$cover,$owner);
+						$out .= $message_button;
+					}
+
+					$out .= wpqa_get_avatar_link(array("user_id" => $author_id,"size" => ($author_page == "small"?42:($author_page == "columns" || $author_page == "columns_pop"?70:84)),"span" => "span"));
+					if ($author_page == "advanced" && (isset($message_button) && $message_button != "") && $owner == false) {
+						$out .= wpqa_following($author_id,"",$owner,"login");
+					}
+					if ($author_page == "advanced") {
+						$out .= '</div>';
+					}
+				}
+				$author_display_name = get_the_author_meta("display_name",$author_id);
+
+				$profile_credential = get_the_author_meta('profile_credential',$author_id);
+				$out .= '<div class="user-content">
+				<div class="user-inner">';
+				if ($author_page == "columns" || $author_page == "columns_pop") {
+					$out .= '<div class="user-data-columns">';
+				}
+
+				if ($cover == "") {
+					$out .= '<h4><a href="'.esc_url(wpqa_profile_url($author_id)).'">'.$author_display_name.'</a>'.wpqa_verified_user($author_id).'</h4>';
+
+					if ($profile_credential != "" && $author_page != "grid" && $author_page != "grid_pop" && $author_page != "small" && $author_page != "simple_follow" && $author_page != "columns" && $author_page != "columns_pop") {
+						$out .= '<span class="profile-credential">'.esc_html($profile_credential).'</span>';
+					}
+
+					if ($author_page != "grid_pop" && $author_page != "small" && $author_page != "columns_pop") {
+						$active_points_category = wpqa_options("active_points_category");
+						if ($active_points_category != "on") {
+							$out .= wpqa_get_badge($author_id);
+						}
+					}
+
+					if ($author_page == "columns_pop") {
+						$country = get_the_author_meta('country',$author_id);
+						$city    = get_the_author_meta('city',$author_id);
+						$get_countries = apply_filters('wpqa_get_countries',false);
+						if ((isset($profile_credential) && $profile_credential != "") || (isset($city) && $city != "") || (isset($country) && $country != "" && isset($get_countries[$country]))) {
+							$out .= '<div class="user-data">
+							<ul>';
+							if (isset($profile_credential) && $profile_credential != "") {
+								$out .= '<li class="profile-credential">
+								'.(isset($profile_credential) && $profile_credential != ""?esc_html($profile_credential):"").'
+								</li>';
+							}else if ((isset($city) && $city != "") || (isset($country) && $country != "" && isset($get_countries[$country]))) {
+								$out .= '<li class="city-country">
+								<i class="icon-location"></i>
+								'.(isset($city) && $city != ""?esc_html($city).", ":"").(isset($country) && $country != "" && isset($get_countries[$country])?$get_countries[$country]:"").'
+								</li>';
+							}
+							$out .= '</ul>
+							</div>';
+						}
+					}
+
+					if ($author_page == "columns" || $author_page == "columns_pop") {
+						$out .= '</div>';
+					}
+				}
+
+				if ($author_page != "grid" && $author_page != "grid_pop" && $author_page != "small" && $author_page != "simple_follow" && $author_page != "columns" && $author_page != "columns_pop") {
+					$the_author_meta_description = get_the_author_meta("description",$author_id);
+					if ($the_author_meta_description != "") {
+						$out .= '<p>'.($the_author_meta_description).'</p>';
+					}
+				}
+
+				if ($author_page == "advanced") {
+					/* user data */
+					$country            = get_the_author_meta('country',$author_id);
+					$city               = get_the_author_meta('city',$author_id);
+					$profile_credential = get_the_author_meta('profile_credential',$author_id);
+					$age                = get_the_author_meta('age',$author_id);
+					$phone              = get_the_author_meta('phone',$author_id);
+					$url                = get_the_author_meta('url',$author_id);
+					$gender             = get_the_author_meta('gender',$author_id);
+					if ((isset($profile_credential) && $profile_credential != "") || (isset($city) && $city != "") || (isset($country) && $country != "") || (isset($phone) && $phone != "") || (isset($url) && $url != "") || (isset($gender) && $gender != "") || (isset($age) && $age != "")) {
+						$out .= '<div class="user-data">
+						<ul>';
+						$get_countries = apply_filters('wpqa_get_countries',false);
+						if ((isset($city) && $city != "") || (isset($country) && $country != "" && isset($get_countries[$country]))) {
+							$out .= '<li class="city-country">
+							<i class="icon-location"></i>
+							'.(isset($city) && $city != ""?$city.", ":"").(isset($country) && $country != "" && isset($get_countries[$country])?$get_countries[$country]:"").'
+							</li>';
+						}
+						if (isset($phone) && $phone != "") {
+							$out .= '<li class="user-phone">
+							<i class="icon-phone"></i>
+							'.esc_attr($phone).'
+							</li>';
+						}
+						if (isset($url) && $url != "") {
+							$out .= '<li class="user-url">
+							<a href="'.esc_url($url).'">
+							<i class="icon-link"></i>
+							'.esc_html__("Visit site","wpqa").'
+							</a>
+							</li>';
+						}
+						if (isset($gender) && $gender != "") {
+							$out .= '<li class="user-gender">
+							<i class="icon-heart"></i>
+							'.($gender == "male" || $gender == 1?esc_html__("Male","wpqa"):"").($gender == "female" || $gender == 2?esc_html__("Female","wpqa"):"").($gender == "other" || $gender == 3?esc_html__("Other","wpqa"):"").'
+							</li>';
+						}
+						if (isset($age) && $age != "") {
+							$age = (date_create($age)?date_diff(date_create($age),date_create('today'))->y:"");
+							$out .= '<li class="user-age">
+							<i class="icon-globe"></i>
+							'.esc_attr($age)." ".esc_html__("years old","wpqa").'
+							</li>';
+						}
+						$out .= '</ul>
+						</div><!-- End user-data -->';
+					}
+				}
+
+				if ($author_page == "grid" || $author_page == "grid_pop" || $author_page == "small" || $author_page == "simple_follow") {
+					$out .= '<div class="user-data">
+					<ul>';
+					if ($type_post == "post") {
+						$out .= '<li class="user-posts">
+						<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"posts")).'">
+						'.($widget == 'widget'?'':'<i class="icon-book-open"></i>').'
+						'.wpqa_count_number($posts_count).' '.esc_html__("Posts","wpqa").'
+						</a>
+						</li>
+						<li class="user-comments">
+						<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"comments")).'">
+						'.($widget == 'widget'?'':'<i class="icon-comment"></i>').'
+						'.wpqa_count_number($comments_count).' '.esc_html__("Comments","wpqa").'
+						</a>
+						</li>';
+					}else {
+						$out .= '<li class="user-questions">
+						<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"questions")).'">
+						'.($widget == 'widget'?'':'<i class="icon-book-open"></i>').'
+						'.wpqa_count_number($questions_count).' '.esc_html__("Questions","wpqa").'
+						</a>
+						</li>';
+						if ($type_post == "the_best_answer") {
+							$out .= '<li class="user-best-answers">
+							<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"best_answers")).'">
+							'.($widget == 'widget'?'':'<i class="icon-graduation-cap"></i>').'
+							'.($the_best_answer == ""?0:wpqa_count_number($the_best_answer)).' '.esc_html__("Best Answers","wpqa").'
+							</a>
+							</li>';
+						}else if ($type_post == "points" && $active_points == "on") {
+							$out .= '<li class="user-points">
+							<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"points")).'">
+							'.($widget == 'widget'?'':'<i class="icon-bucket"></i>').'
+							'.($points == ""?0:wpqa_count_number($points)).' '.esc_html__("Points","wpqa").'
+							</a>
+							</li>';
+						}else {
+							$out .= '<li class="user-answers">
+							<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"answers")).'">
+							'.($widget == 'widget'?'':'<i class="icon-comment"></i>').'
+							'.wpqa_count_number($answers_count).' '.esc_html__("Answers","wpqa").'
+							</a>
+							</li>';
+						}
+					}
+					$out .= '</ul>
+					</div><!-- End user-data -->';
+
+					if ($widget == "widget") {
+						$points_category_user = ($category !== ""?(int)get_user_meta($author_id,"points_category".$category,true):"");
+						if ($category !== "") {
+							$out .= apply_filters("wpqa_widget_before_badge",false,$category);
+						}
+						$out .= wpqa_get_badge($author_id,"",($points_category_user !== ""?$points_category_user:""));
+					}
+				}
+
+				if ($author_page == "simple_follow" && $owner == false) {
+					$out .= wpqa_following($author_id,"",$owner);
+				}
+				$out .= '</div>';
+
+				if ($author_page != "grid" && $author_page != "grid_pop" && $author_page != "small" && $author_page != "simple_follow" && $author_page != "columns" && $author_page != "columns_pop") {
+					$twitter = get_the_author_meta('twitter',$author_id);
+					$facebook = get_the_author_meta('facebook',$author_id);
+					$linkedin = get_the_author_meta('linkedin',$author_id);
+					$youtube = get_the_author_meta('youtube',$author_id);
+					$vimeo = get_the_author_meta('vimeo',$author_id);
+					$pinterest = get_the_author_meta('pinterest',$author_id);
+					$instagram = get_the_author_meta('instagram',$author_id);
+					$user_email = get_the_author_meta('email',$author_id);
+					if (($user_email && isset($follow_email) && $follow_email == "on") || $facebook || $twitter || $linkedin || $youtube || $vimeo || $pinterest || $instagram || ($cover == "" && (!isset($message_button) || (isset($message_button) && $message_button == "")))) {
+						$out .= '<div class="social-ul">
+						<ul>';
+						if ($author_page != "single-author" && ($cover == "" && (!isset($message_button) || (isset($message_button) && $message_button == ""))) && $owner == false) {
+							$out .= '<li class="social-follow">'.wpqa_following($author_id,"style_3",$owner).'</li>';
+						}
+						if ($facebook) {
+							$out .= '<li class="social-facebook"><a title="Facebook" class="tooltip-n" href="'.esc_url($facebook).'" target="_blank"><i class="icon-facebook"></i></a></li>';
+						}
+						if ($twitter) {
+							$out .= '<li class="social-twitter"><a title="Twitter" class="tooltip-n" href="'.esc_url($twitter).'" target="_blank"><i class="icon-twitter"></i></a></li>';
+						}
+						if ($linkedin) {
+							$out .= '<li class="social-linkedin"><a title="Linkedin" class="tooltip-n" href="'.esc_url($linkedin).'" target="_blank"><i class="icon-linkedin"></i></a></li>';
+						}
+						if ($pinterest) {
+							$out .= '<li class="social-pinterest"><a title="Pinterest" class="tooltip-n" href="'.esc_url($pinterest).'" target="_blank"><i class="icon-pinterest"></i></a></li>';
+						}
+						if ($instagram) {
+							$out .= '<li class="social-instagram"><a title="Instagram" class="tooltip-n" href="'.esc_url($instagram).'" target="_blank"><i class="icon-instagrem"></i></a></li>';
+						}
+						if ($youtube) {
+							$out .= '<li class="social-youtube"><a title="Youtube" class="tooltip-n" href="'.esc_url($youtube).'" target="_blank"><i class="icon-play"></i></a></li>';
+						}
+						if ($vimeo) {
+							$out .= '<li class="social-vimeo"><a title="Vimeo" class="tooltip-n" href="'.esc_url($vimeo).'" target="_blank"><i class="icon-vimeo"></i></a></li>';
+						}
+						if ($user_email && isset($follow_email) && $follow_email == "on") {
+							$out .= '<li class="social-email"><a title="'.esc_html__("Email","wpqa").'" class="tooltip-n" href="mailto:'.esc_attr($user_email).'" target="_blank" rel="nofollow"><i class="icon-mail"></i></a></li>';
+						}
+						$out .= '</ul>
+						</div><!-- End social-ul -->';
+					}
+				}
+				$out .= '</div><!-- End user-content -->';
+
+				if ($author_page == "grid_pop" && $owner == false) {
+					$out .= wpqa_following($author_id,"",$owner);
+				}
+
+				if ($cover == "" && $owner == false && $author_page != "grid" && $author_page != "grid_pop" && $author_page != "small" && $author_page != "simple_follow" && $author_page != "columns" && $author_page != "columns_pop") {
+					$ask_question_to_users = wpqa_options("ask_question_to_users");
+					$breadcrumbs = wpqa_options("breadcrumbs");
+					if ($ask_question_to_users == "on" && $breadcrumbs != "on") {
+						$out .= '<div class="ask-question ask-user-after-social"><a href="'.esc_url(wpqa_add_question_permalink("user")).'" class="button-default ask-question-user">'.esc_html__("Ask","wpqa")." ".$author_display_name.'</a></div>';
+					}
+				}
+
+				if ($author_page == "columns" || $author_page == "columns_pop") {
+					$out .= '<div class="user-columns-data">
+					<ul>';
+					if ($type_post == "post") {
+						$out .= '<li class="user-columns-posts">
+						<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"posts")).'">
+						<i class="icon-book-open"></i>'.($posts_count == ""?0:wpqa_count_number($posts_count)).' '.esc_html__("Posts","wpqa").'
+						</a>
+						</li>
+						<li class="user-columns-comments">
+						<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"comments")).'">
+						<i class="icon-comment"></i>'.($comments_count == ""?0:wpqa_count_number($comments_count)).' '.esc_html__("Comments","wpqa").'
+						</a>
+						</li>';
+					}else {
+						$out .= '<li class="user-columns-questions">
+						<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"questions")).'">
+						<i class="icon-book-open"></i>'.($questions_count == ""?0:wpqa_count_number($questions_count)).' '.esc_html__("Questions","wpqa").'
+						</a>
+						</li>
+						<li class="user-columns-answers">
+						<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"answers")).'">
+						<i class="icon-comment"></i>'.($answers_count == ""?0:wpqa_count_number($answers_count)).' '.esc_html__("Answers","wpqa").'
+						</a>
+						</li>';
+					}
+					$out .= '<li class="user-columns-best-answers">
+					<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"best_answers")).'">
+					<i class="icon-graduation-cap"></i>'.($the_best_answer == ""?0:wpqa_count_number($the_best_answer)).' '.esc_html__("Best Answers","wpqa").'
+					</a>
+					</li>';
+					if ($active_points == "on") {
+						$out .= '<li class="user-columns-points">
+						<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"points")).'">
+						<i class="icon-bucket"></i>'.($points == ""?0:wpqa_count_number($points)).' '.esc_html__("Points","wpqa").'
+						</a>
+						</li>';
+					}
+					$out .= '</ul>
+					</div><!-- End user-columns-data -->';
+
+					$out .= '<div class="user-follow-profile">';
+					if ($owner == false) {
+						$out .= wpqa_following($author_id,"style_2",$owner);
+					}
+					$out .= '<a href="'.wpqa_profile_url($author_id).'">'.esc_html__("View Profile","wpqa").'</a>
+					</div><!-- End user-follow-profile -->';
+				}
+
+				$out .= '<div class="clearfix"></div>
+				</div><!-- End post-inner -->
+				</div><!-- End post -->';
+
+				if ($author_page == "grid_pop") {
+					$out .= '<div class="user-data">
+					<ul>
+					<li class="user-best-answers">
+					<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"best_answers")).'">
+					<i class="icon-graduation-cap"></i>
+					'.($the_best_answer == ""?0:wpqa_count_number($the_best_answer)).' '.esc_html__("Best Answers","wpqa").'
+					</a>
+					</li>';
+					if ($active_points == "on") {
+						$out .= '<li class="user-points">
+						<a href="'.esc_url(wpqa_get_profile_permalink($author_id,"points")).'">
+						<i class="icon-bucket"></i>
+						'.($points == ""?0:wpqa_count_number($points)).' '.esc_html__("Points","wpqa").'
+						</a>
+						</li>';
+					}
+					$out .= '</ul>
+					</div><!-- End user-data -->';
+				}
+
+				return $out;
 			}
 		}
-		return $out;
-	}
-endif;
-/* Following */
-if (!function_exists('wpqa_following')) :
-	function wpqa_following($author_id,$follow_style = "",$owner = "",$login = "") {
-		$out = "";
-		if ((is_user_logged_in() && $owner == false) || (!is_user_logged_in() && $login == "login")) {
-			if (!is_user_logged_in() && $login == "login") {
-				$out .= '<div class="user_follow"><a href="#" class="login-panel tooltip-n" title="'.esc_attr__("Login","wpqa").'"><i class="icon-plus"></i></a></div>';
-			}else {
-				$following_me = get_user_meta(get_current_user_id(),"following_me",true);
-				if (isset($following_me)) {
-					if ($follow_style == "style_2") {
-						$following_you = get_user_meta($author_id,"following_you",true);
-					}
-					$out .= '<div class="user_follow'.($follow_style == "style_2"?"_2":"").($follow_style == "style_3"?"_3":"").($follow_style == "style_4"?"_4":"").(!empty($following_me) && in_array($author_id,$following_me)?($follow_style == "style_4"?" user_follow_done":" user_follow_yes"):"").'">
+	endif;
+	/* Message button */
+	if (!function_exists('wpqa_message_button')) :
+		function wpqa_message_button($author_id,$text = "",$owner = "",$return = "") {
+			$out = "";
+			$active_message = wpqa_options("active_message");
+			if ($active_message == "on" && $owner == false) {
+				$send_message_no_register = wpqa_options("send_message_no_register");
+				$received_message = esc_attr(get_the_author_meta('received_message',$author_id));
+				$get_current_user_id = get_current_user_id();
+				$block_message = esc_attr(get_the_author_meta('block_message',$get_current_user_id));
+				$user_block_message = array();
+				if (is_user_logged_in()) {
+					$user_block_message = get_user_meta($author_id,"user_block_message",true);
+				}
+				if (((!is_user_logged_in() && $send_message_no_register == "on") || (is_user_logged_in() && (empty($user_block_message) || (isset($user_block_message) && is_array($user_block_message) && !in_array($get_current_user_id,$user_block_message))) && ($block_message != "on" || is_super_admin($get_current_user_id)) && ($received_message == "" || $received_message == "on")))) {
+					$out .= '<div class="'.($text != ""?'send_message_text':'send_message_icon').'"><a href="#" title="'.esc_html__("Send Message","wpqa").'" class="wpqa-message tooltip-n'.($text != ""?' button-default':'').'">'.($text != ""?esc_html__("Message","wpqa"):'<i class="icon-mail"></i>').'</a></div>';
+				}
+			}
+			return $out;
+		}
+	endif;
+	/* Following */
+	if (!function_exists('wpqa_following')) :
+		function wpqa_following($author_id,$follow_style = "",$owner = "",$login = "") {
+			$out = "";
+			if ((is_user_logged_in() && $owner == false) || (!is_user_logged_in() && $login == "login")) {
+				if (!is_user_logged_in() && $login == "login") {
+					$out .= '<div class="user_follow"><a href="#" class="login-panel tooltip-n" title="'.esc_attr__("Login","wpqa").'"><i class="icon-plus"></i></a></div>';
+				}else {
+					$following_me = get_user_meta(get_current_user_id(),"following_me",true);
+					if (isset($following_me)) {
+						if ($follow_style == "style_2") {
+							$following_you = get_user_meta($author_id,"following_you",true);
+						}
+						$out .= '<div class="user_follow'.($follow_style == "style_2"?"_2":"").($follow_style == "style_3"?"_3":"").($follow_style == "style_4"?"_4":"").(!empty($following_me) && in_array($author_id,$following_me)?($follow_style == "style_4"?" user_follow_done":" user_follow_yes"):"").'">
 						<div class="small_loader loader_2'.($follow_style == "style_2"?" user_follow_loader":"").'"></div>';
 						if (!empty($following_me) && in_array($author_id,$following_me)) {
 							$out .= '<a href="#" class="following_not tooltip-n'.($follow_style == "style_4"?" button-default":"").'" data-rel="'.(int)$author_id.'" title="'.esc_attr__("Unfollow","wpqa").'">';
-								if ($follow_style == "style_2" || $follow_style == "style_3" || $follow_style == "style_4") {
-									$out .= '<span class="follow-value">'.esc_html__("Unfollow","wpqa").'</span>';
-									if ($follow_style == "style_2") {
-										$out .= '<span class="follow-count">'.($following_you == ""?0:wpqa_count_number($following_you)).'</span>';
-									}
-								}else {
-									$out .= '<i class="icon-minus"></i>';
+							if ($follow_style == "style_2" || $follow_style == "style_3" || $follow_style == "style_4") {
+								$out .= '<span class="follow-value">'.esc_html__("Unfollow","wpqa").'</span>';
+								if ($follow_style == "style_2") {
+									$out .= '<span class="follow-count">'.($following_you == ""?0:wpqa_count_number($following_you)).'</span>';
 								}
+							}else {
+								$out .= '<i class="icon-minus"></i>';
+							}
 							$out .= '</a>';
 						}else {
 							$out .= '<a href="#" class="following_you tooltip-n'.($follow_style == "style_4"?" button-default":"").'" data-rel="'.(int)$author_id.'" title="'.esc_attr__("Follow","wpqa").'">';
@@ -1935,241 +1937,241 @@ if (!function_exists('wpqa_following')) :
 							}
 							$out .= '</a>';
 						}
-					$out .= '</div>';
+						$out .= '</div>';
+					}
+				}
+			}
+			return $out;
+		}
+	endif;
+	/* Get verified user */
+	if (!function_exists('wpqa_verified_user')) :
+		function wpqa_verified_user($author_id,$return = "") {
+			if ($author_id > 0) {
+				$verified_user = get_the_author_meta('verified_user',$author_id);
+				if ($verified_user == 1 || $verified_user == "on") {
+					return '<span class="verified_user tooltip-n" title="'.esc_html__("Verified","wpqa").'"><i class="icon-check"></i></span>';
 				}
 			}
 		}
-		return $out;
-	}
-endif;
-/* Get verified user */
-if (!function_exists('wpqa_verified_user')) :
-	function wpqa_verified_user($author_id,$return = "") {
-		if ($author_id > 0) {
-			$verified_user = get_the_author_meta('verified_user',$author_id);
-			if ($verified_user == 1 || $verified_user == "on") {
-				return '<span class="verified_user tooltip-n" title="'.esc_html__("Verified","wpqa").'"><i class="icon-check"></i></span>';
-			}
-		}
-	}
-endif;
-/* Get badge */
-if (!function_exists('wpqa_get_badge')) :
-	function wpqa_get_badge($author_id,$return = "",$points = "") {
-		$badges_style = wpqa_options("badges_style");
-		$author_id = (int)$author_id;
-		if ($badges_style == "by_groups_points") {
-			if ($author_id > 0) {
-				$last_key = 0;
-				$points = (int)($points !== ""?$points:get_user_meta($author_id,"points",true));
-				$badges_groups_points = wpqa_options("badges_groups_points");
-				$user_info = get_userdata($author_id);
-				$group_key = key($user_info->caps);
-				if (isset($badges_groups_points) && is_array($badges_groups_points)) {
-					$badges_groups_points = array_values($badges_groups_points);
-					foreach ($badges_groups_points as $badges_k => $badges_v) {
-						if ($badges_v["badge_group"] == $group_key) {
-							$badges_points[] = $badges_v;
+	endif;
+	/* Get badge */
+	if (!function_exists('wpqa_get_badge')) :
+		function wpqa_get_badge($author_id,$return = "",$points = "") {
+			$badges_style = wpqa_options("badges_style");
+			$author_id = (int)$author_id;
+			if ($badges_style == "by_groups_points") {
+				if ($author_id > 0) {
+					$last_key = 0;
+					$points = (int)($points !== ""?$points:get_user_meta($author_id,"points",true));
+					$badges_groups_points = wpqa_options("badges_groups_points");
+					$user_info = get_userdata($author_id);
+					$group_key = key($user_info->caps);
+					if (isset($badges_groups_points) && is_array($badges_groups_points)) {
+						$badges_groups_points = array_values($badges_groups_points);
+						foreach ($badges_groups_points as $badges_k => $badges_v) {
+							if ($badges_v["badge_group"] == $group_key) {
+								$badges_points[] = $badges_v;
+							}
+
 						}
-						
-					}
-					if (isset($badges_points) && is_array($badges_points)) {
-						foreach ($badges_points as $key => $badge_point) {
-							if ($points >= $badge_point["badge_points"]) {
-								$last_key = $key;
+						if (isset($badges_points) && is_array($badges_points)) {
+							foreach ($badges_points as $key => $badge_point) {
+								if ($points >= $badge_point["badge_points"]) {
+									$last_key = $key;
+								}
 							}
 						}
-					}
-					$badge_key = (isset($last_key)?$last_key:"");
-					if ($return == "points") {
-						return (isset($badges_points[$badge_key]["badge_points"])?$badges_points[$badge_key]["badge_points"]:"");
-					}else if ($return == "color") {
-						return (isset($badges_points[$badge_key]["badge_color"])?$badges_points[$badge_key]["badge_color"]:"");
-					}else if ($return == "name") {
-						return (isset($badges_points[$badge_key]["badge_name"])?strip_tags(stripslashes($badges_points[$badge_key]["badge_name"]),"<i>"):"");
-					}else if ($return == "key") {
-						return $badge_key;
-					}else if ($return == "first_key") {
-						$first_badge = reset($badges_points);
-						return ($first_badge['badge_points'] == $badges_points[$badge_key]["badge_points"]?$badge_key:"");
-					}else {
-						return '<span class="badge-span" style="background-color: '.(isset($badges_points[$badge_key]["badge_color"])?$badges_points[$badge_key]["badge_color"]:"").'">'.(isset($badges_points[$badge_key]["badge_name"])?strip_tags(stripslashes($badges_points[$badge_key]["badge_name"]),"<i>"):"").'</span>';
-					}
-				}
-			}
-		}else if ($badges_style == "by_groups") {
-			if ($author_id > 0) {
-				$badges_groups = wpqa_options("badges_groups");
-				$user_info = get_userdata($author_id);
-				$group_key = key($user_info->caps);
-				if (isset($badges_groups) && is_array($badges_groups)) {
-					global $wp_roles;
-					$badges_groups = array_values($badges_groups);
-					$found_key = array_search($group_key,array_column($badges_groups,'badge_name'));
-					$user_group = $user_info->roles[0];
-					$user_group = $wp_roles->roles[$user_group]["name"];
-					if ($return == "color") {
-						return $badges_groups[$found_key]["badge_color"];
-					}else if ($return == "name") {
-						return $user_group;
-					}else if ($return == "key") {
-						return $found_key;
-					}else if ($return == "first_key") {
-						$first_badge = reset($badges_groups);
-						return ($first_badge['badge_points'] == $badges_groups[$found_key]["badge_points"]?$found_key:"");
-					}else {
-						return '<span class="badge-span" style="background-color: '.$badges_groups[$found_key]["badge_color"].'">'.$user_group.'</span>';
-					}
-				}
-			}
-		}else {
-			$active_points = wpqa_options("active_points");
-			if ($author_id > 0 && $active_points == "on") {
-				$last_key = 0;
-				$points = (int)($points !== ""?$points:get_user_meta($author_id,"points",true));
-				$badges = wpqa_options("badges");
-				if (isset($badges) && is_array($badges)) {
-					$badges = (!empty($badges)?array_values($badges):array());
-					foreach ($badges as $badges_k => $badges_v) {
-						$badges_points[] = $badges_v["badge_points"];
-					}
-					if (isset($badges_points) && is_array($badges_points)) {
-						foreach ($badges_points as $key => $badge_point) {
-							if ($points >= $badge_point) {
-								$last_key = $key;
-							}
+						$badge_key = (isset($last_key)?$last_key:"");
+						if ($return == "points") {
+							return (isset($badges_points[$badge_key]["badge_points"])?$badges_points[$badge_key]["badge_points"]:"");
+						}else if ($return == "color") {
+							return (isset($badges_points[$badge_key]["badge_color"])?$badges_points[$badge_key]["badge_color"]:"");
+						}else if ($return == "name") {
+							return (isset($badges_points[$badge_key]["badge_name"])?strip_tags(stripslashes($badges_points[$badge_key]["badge_name"]),"<i>"):"");
+						}else if ($return == "key") {
+							return $badge_key;
+						}else if ($return == "first_key") {
+							$first_badge = reset($badges_points);
+							return ($first_badge['badge_points'] == $badges_points[$badge_key]["badge_points"]?$badge_key:"");
+						}else {
+							return '<span class="badge-span" style="background-color: '.(isset($badges_points[$badge_key]["badge_color"])?$badges_points[$badge_key]["badge_color"]:"").'">'.(isset($badges_points[$badge_key]["badge_name"])?strip_tags(stripslashes($badges_points[$badge_key]["badge_name"]),"<i>"):"").'</span>';
 						}
 					}
-					$badge_key = $last_key;
-					if ($return == "points") {
-						return $badges[$badge_key]["badge_points"];
-					}else if ($return == "color") {
-						return $badges[$badge_key]["badge_color"];
-					}else if ($return == "name") {
-						return strip_tags(stripslashes($badges[$badge_key]["badge_name"]),"<i>");
-					}else if ($return == "key") {
-						return $badge_key;
-					}else if ($return == "first_key") {
-						$first_badge = reset($badges);
-						return ($first_badge['badge_points'] == $badges[$badge_key]["badge_points"]?$badge_key:"");
-					}else {
-						return '<span class="badge-span" style="background-color: '.$badges[$badge_key]["badge_color"].'">'.strip_tags(stripslashes($badges[$badge_key]["badge_name"]),"<i>").'</span>';
+				}
+			}else if ($badges_style == "by_groups") {
+				if ($author_id > 0) {
+					$badges_groups = wpqa_options("badges_groups");
+					$user_info = get_userdata($author_id);
+					$group_key = key($user_info->caps);
+					if (isset($badges_groups) && is_array($badges_groups)) {
+						global $wp_roles;
+						$badges_groups = array_values($badges_groups);
+						$found_key = array_search($group_key,array_column($badges_groups,'badge_name'));
+						$user_group = $user_info->roles[0];
+						$user_group = $wp_roles->roles[$user_group]["name"];
+						if ($return == "color") {
+							return $badges_groups[$found_key]["badge_color"];
+						}else if ($return == "name") {
+							return $user_group;
+						}else if ($return == "key") {
+							return $found_key;
+						}else if ($return == "first_key") {
+							$first_badge = reset($badges_groups);
+							return ($first_badge['badge_points'] == $badges_groups[$found_key]["badge_points"]?$found_key:"");
+						}else {
+							return '<span class="badge-span" style="background-color: '.$badges_groups[$found_key]["badge_color"].'">'.$user_group.'</span>';
+						}
+					}
+				}
+			}else {
+				$active_points = wpqa_options("active_points");
+				if ($author_id > 0 && $active_points == "on") {
+					$last_key = 0;
+					$points = (int)($points !== ""?$points:get_user_meta($author_id,"points",true));
+					$badges = wpqa_options("badges");
+					if (isset($badges) && is_array($badges)) {
+						$badges = (!empty($badges)?array_values($badges):array());
+						foreach ($badges as $badges_k => $badges_v) {
+							$badges_points[] = $badges_v["badge_points"];
+						}
+						if (isset($badges_points) && is_array($badges_points)) {
+							foreach ($badges_points as $key => $badge_point) {
+								if ($points >= $badge_point) {
+									$last_key = $key;
+								}
+							}
+						}
+						$badge_key = $last_key;
+						if ($return == "points") {
+							return $badges[$badge_key]["badge_points"];
+						}else if ($return == "color") {
+							return $badges[$badge_key]["badge_color"];
+						}else if ($return == "name") {
+							return strip_tags(stripslashes($badges[$badge_key]["badge_name"]),"<i>");
+						}else if ($return == "key") {
+							return $badge_key;
+						}else if ($return == "first_key") {
+							$first_badge = reset($badges);
+							return ($first_badge['badge_points'] == $badges[$badge_key]["badge_points"]?$badge_key:"");
+						}else {
+							return '<span class="badge-span" style="background-color: '.$badges[$badge_key]["badge_color"].'">'.strip_tags(stripslashes($badges[$badge_key]["badge_name"]),"<i>").'</span>';
+						}
 					}
 				}
 			}
 		}
-	}
-endif;
-/* Post tag callback */
-if (!function_exists('wpqa_post_tag_callback')) :
-	function wpqa_post_tag_callback($count) {
-		return sprintf(_n(esc_html__('%s post','wpqa'),esc_html__('%s posts','wpqa'),$count),number_format_i18n($count));
-	}
-endif;
-/* Question tag callback */
-if (!function_exists('wpqa_question_tags_callback')) :
-	function wpqa_question_tags_callback($count) {
-		return sprintf(_n(esc_html__('%s question','wpqa'),esc_html__('%s questions','wpqa'),$count),number_format_i18n($count));
-	}
-endif;
-/* Count posts by type */
-if (!function_exists('wpqa_count_posts_by_type')) :
-	function wpqa_count_posts_by_type( $post_type = 'post', $post_status = "publish" ) {
-		global $wpdb;
-		$count = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->posts WHERE $wpdb->posts.post_type = '$post_type' AND $wpdb->posts.post_status = '$post_status'" );
-	  	return $count;
-	}
-endif;
-/* Count posts by user */
-if (!function_exists('wpqa_count_posts_by_user')) :
-	function wpqa_count_posts_by_user( $user_id, $post_type = "post", $post_status = "publish", $category = 0 ) {
-		global $wpdb;
-		$count = $wpdb->get_var("SELECT COUNT(*) 
-		FROM $wpdb->posts 
-		".($category > 0?"LEFT JOIN $wpdb->term_relationships ON ($wpdb->posts.ID = $wpdb->term_relationships.object_id)":"")."
-
-		LEFT JOIN $wpdb->postmeta
-		ON ($wpdb->posts.ID = $wpdb->postmeta.post_id AND $wpdb->postmeta.meta_key = 'user_id' ) 
-		
-		LEFT JOIN $wpdb->postmeta AS mt1
-		ON ($wpdb->posts.ID = mt1.post_id AND mt1.meta_key = 'private_question' )
-		
-		WHERE 1=1 
-		AND ( ( $wpdb->postmeta.post_id IS NULL AND mt1.post_id IS NULL ) OR ( mt1.meta_value = 0 ) )
-
-		".($category > 0?"AND ( $wpdb->term_relationships.term_taxonomy_id IN ($category) )":"")."
-		
-		AND $wpdb->posts.post_type = '$post_type'
-		AND $wpdb->posts.post_status = '$post_status'
-		AND $wpdb->posts.post_author = $user_id");
-		
-		return $count;
-	}
-endif;
-/* Count new message */
-if (!function_exists('wpqa_count_new_message')) :
-	function wpqa_count_new_message( $user_id = "", $post_status = "publish" ) {
-		global $wpdb;
-		
-		$count = $wpdb->get_var( "SELECT COUNT(*) 
-		FROM $wpdb->posts 
-		
-		LEFT JOIN $wpdb->postmeta AS mt1
-		ON ($wpdb->posts.ID = mt1.post_id
-		AND mt1.meta_key = 'delete_inbox_message' )
-		
-		LEFT JOIN $wpdb->postmeta AS mt2
-		ON ($wpdb->posts.ID = mt2.post_id
-		AND mt2.meta_key = 'message_user_id' )
-		
-		LEFT JOIN $wpdb->postmeta AS mt3
-		ON ($wpdb->posts.ID = mt3.post_id
-		AND mt3.meta_key = 'message_new' )
-		
-		WHERE 1=1 
-		
-		AND ( mt1.post_id IS NULL )
-		AND ( mt2.meta_value = $user_id )
-		AND ( (mt3.meta_value = 1) || (mt3.meta_value = 'on') )
-		
-		AND $wpdb->posts.post_type = 'message'
-		AND $wpdb->posts.post_status = '$post_status'");
-		
-	  	return $count;
-	}
-endif;
-/* User table */
-if (!function_exists('wpqa_user_table')) :
-	function wpqa_user_table( $column ) {
-		$user_meta_admin = wpqa_options("user_meta_admin");
-		if (isset ($user_meta_admin) && is_array($user_meta_admin)) {
-			$column['question']   = esc_html__('Questions','wpqa');
-			if (isset($user_meta_admin["phone"]) && $user_meta_admin["phone"] == "phone") {
-				$column['phone']   = esc_html__('Phone','wpqa');
-			}
-			if (isset($user_meta_admin["country"]) && $user_meta_admin["country"] == "country") {
-				$column['country'] = esc_html__('Country','wpqa');
-			}
-			if (isset($user_meta_admin["age"]) && $user_meta_admin["age"] == "age") {
-				$column['age']     = esc_html__('Age','wpqa');
-			}
+	endif;
+	/* Post tag callback */
+	if (!function_exists('wpqa_post_tag_callback')) :
+		function wpqa_post_tag_callback($count) {
+			return sprintf(_n(esc_html__('%s post','wpqa'),esc_html__('%s posts','wpqa'),$count),number_format_i18n($count));
 		}
-		return $column;
-	}
-endif;
-add_filter( 'manage_users_columns', 'wpqa_user_table' );
-if (!function_exists('wpqa_user_table_row')) :
-	function wpqa_user_table_row( $val, $column_name, $user_id ) {
-		$user = get_userdata( $user_id );
-		switch ($column_name) {
-			case 'question' :
+	endif;
+	/* Question tag callback */
+	if (!function_exists('wpqa_question_tags_callback')) :
+		function wpqa_question_tags_callback($count) {
+			return sprintf(_n(esc_html__('%s question','wpqa'),esc_html__('%s questions','wpqa'),$count),number_format_i18n($count));
+		}
+	endif;
+	/* Count posts by type */
+	if (!function_exists('wpqa_count_posts_by_type')) :
+		function wpqa_count_posts_by_type( $post_type = 'post', $post_status = "publish" ) {
+			global $wpdb;
+			$count = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->posts WHERE $wpdb->posts.post_type = '$post_type' AND $wpdb->posts.post_status = '$post_status'" );
+			return $count;
+		}
+	endif;
+	/* Count posts by user */
+	if (!function_exists('wpqa_count_posts_by_user')) :
+		function wpqa_count_posts_by_user( $user_id, $post_type = "post", $post_status = "publish", $category = 0 ) {
+			global $wpdb;
+			$count = $wpdb->get_var("SELECT COUNT(*) 
+				FROM $wpdb->posts 
+				".($category > 0?"LEFT JOIN $wpdb->term_relationships ON ($wpdb->posts.ID = $wpdb->term_relationships.object_id)":"")."
+
+				LEFT JOIN $wpdb->postmeta
+				ON ($wpdb->posts.ID = $wpdb->postmeta.post_id AND $wpdb->postmeta.meta_key = 'user_id' ) 
+
+				LEFT JOIN $wpdb->postmeta AS mt1
+				ON ($wpdb->posts.ID = mt1.post_id AND mt1.meta_key = 'private_question' )
+
+				WHERE 1=1 
+				AND ( ( $wpdb->postmeta.post_id IS NULL AND mt1.post_id IS NULL ) OR ( mt1.meta_value = 0 ) )
+
+				".($category > 0?"AND ( $wpdb->term_relationships.term_taxonomy_id IN ($category) )":"")."
+
+				AND $wpdb->posts.post_type = '$post_type'
+				AND $wpdb->posts.post_status = '$post_status'
+				AND $wpdb->posts.post_author = $user_id");
+
+			return $count;
+		}
+	endif;
+	/* Count new message */
+	if (!function_exists('wpqa_count_new_message')) :
+		function wpqa_count_new_message( $user_id = "", $post_status = "publish" ) {
+			global $wpdb;
+
+			$count = $wpdb->get_var( "SELECT COUNT(*) 
+				FROM $wpdb->posts 
+
+				LEFT JOIN $wpdb->postmeta AS mt1
+				ON ($wpdb->posts.ID = mt1.post_id
+				AND mt1.meta_key = 'delete_inbox_message' )
+
+				LEFT JOIN $wpdb->postmeta AS mt2
+				ON ($wpdb->posts.ID = mt2.post_id
+				AND mt2.meta_key = 'message_user_id' )
+
+				LEFT JOIN $wpdb->postmeta AS mt3
+				ON ($wpdb->posts.ID = mt3.post_id
+				AND mt3.meta_key = 'message_new' )
+
+				WHERE 1=1 
+
+				AND ( mt1.post_id IS NULL )
+				AND ( mt2.meta_value = $user_id )
+				AND ( (mt3.meta_value = 1) || (mt3.meta_value = 'on') )
+
+				AND $wpdb->posts.post_type = 'message'
+				AND $wpdb->posts.post_status = '$post_status'");
+
+			return $count;
+		}
+	endif;
+	/* User table */
+	if (!function_exists('wpqa_user_table')) :
+		function wpqa_user_table( $column ) {
+			$user_meta_admin = wpqa_options("user_meta_admin");
+			if (isset ($user_meta_admin) && is_array($user_meta_admin)) {
+				$column['question']   = esc_html__('Questions','wpqa');
+				if (isset($user_meta_admin["phone"]) && $user_meta_admin["phone"] == "phone") {
+					$column['phone']   = esc_html__('Phone','wpqa');
+				}
+				if (isset($user_meta_admin["country"]) && $user_meta_admin["country"] == "country") {
+					$column['country'] = esc_html__('Country','wpqa');
+				}
+				if (isset($user_meta_admin["age"]) && $user_meta_admin["age"] == "age") {
+					$column['age']     = esc_html__('Age','wpqa');
+				}
+			}
+			return $column;
+		}
+	endif;
+	add_filter( 'manage_users_columns', 'wpqa_user_table' );
+	if (!function_exists('wpqa_user_table_row')) :
+		function wpqa_user_table_row( $val, $column_name, $user_id ) {
+			$user = get_userdata( $user_id );
+			switch ($column_name) {
+				case 'question' :
 				$count_user_ques_slugs = wpqa_count_posts_by_user($user_id,"question");
 				return ($count_user_ques_slugs > 0?'<a href="'.admin_url('edit.php?post_type=question&author='.$user_id).'">':'').$count_user_ques_slugs.($count_user_ques_slugs > 0?'</a>':'');
 				break;
-			case 'phone' :
+				case 'phone' :
 				return get_the_author_meta( 'phone', $user_id );
 				break;
-			case 'country' :
+				case 'country' :
 				$get_countries = apply_filters('wpqa_get_countries',false);
 				$country = get_the_author_meta( 'country', $user_id );
 				if ($country && isset($get_countries[$country])) {
@@ -2178,751 +2180,751 @@ if (!function_exists('wpqa_user_table_row')) :
 					return '';
 				}
 				break;
-			case 'age' :
+				case 'age' :
 				$age = get_the_author_meta( 'age', $user_id );
 				return (date_create($age)?date_diff(date_create($age),date_create('today'))->y:"");
 				break;
-			default:
+				default:
+			}
+			return $return;
 		}
-		return $return;
-	}
-endif;
-add_filter( 'manage_users_custom_column', 'wpqa_user_table_row', 10, 3 );
-/* Media library */
-add_action('pre_get_posts','wpqa_media_library');
-if (!function_exists('wpqa_media_library')) :
-	function wpqa_media_library($wp_query_obj) {
-		global $current_user,$pagenow;
-		if (!is_a($current_user,'WP_User') || is_super_admin($current_user->ID))
+	endif;
+	add_filter( 'manage_users_custom_column', 'wpqa_user_table_row', 10, 3 );
+	/* Media library */
+	add_action('pre_get_posts','wpqa_media_library');
+	if (!function_exists('wpqa_media_library')) :
+		function wpqa_media_library($wp_query_obj) {
+			global $current_user,$pagenow;
+			if (!is_a($current_user,'WP_User') || is_super_admin($current_user->ID))
+				return;
+			if ('admin-ajax.php' != $pagenow || $_REQUEST['action'] != 'query-attachments')
+				return;
+			if (!current_user_can('manage_media_library'))
+				$wp_query_obj->set('author',$current_user->ID);
 			return;
-		if ('admin-ajax.php' != $pagenow || $_REQUEST['action'] != 'query-attachments')
-			return;
-		if (!current_user_can('manage_media_library'))
-			$wp_query_obj->set('author',$current_user->ID);
-		return;
-	}
-endif;
-/* Remove item by value */
-if (!function_exists('wpqa_remove_item_by_value')) :
-	function wpqa_remove_item_by_value($array,$val = '',$preserve_keys = true) {
-		if (empty($array) || !is_array($array)) {
-			return false;
 		}
-		if (!in_array($val,$array)) {
-			return $array;
+	endif;
+	/* Remove item by value */
+	if (!function_exists('wpqa_remove_item_by_value')) :
+		function wpqa_remove_item_by_value($array,$val = '',$preserve_keys = true) {
+			if (empty($array) || !is_array($array)) {
+				return false;
+			}
+			if (!in_array($val,$array)) {
+				return $array;
+			}
+			foreach ($array as $key => $value) {
+				if ($value == $val) unset($array[$key]);
+			}
+			return ($preserve_keys === true)?$array:array_values($array);
 		}
-		foreach ($array as $key => $value) {
-			if ($value == $val) unset($array[$key]);
+	endif;
+	/* Insert after key in array */
+	if (!function_exists('wpqa_array_insert_after')) :
+		function wpqa_array_insert_after( array $array, $key, array $new ) {
+			$keys = array_keys( $array );
+			$index = array_search( $key, $keys );
+			$pos = false === $index ? count( $array ) : $index + 1;
+			return array_merge( array_slice( $array, 0, $pos ), $new, array_slice( $array, $pos ) );
 		}
-		return ($preserve_keys === true)?$array:array_values($array);
-	}
-endif;
-/* Insert after key in array */
-if (!function_exists('wpqa_array_insert_after')) :
-function wpqa_array_insert_after( array $array, $key, array $new ) {
-	$keys = array_keys( $array );
-	$index = array_search( $key, $keys );
-	$pos = false === $index ? count( $array ) : $index + 1;
-	return array_merge( array_slice( $array, 0, $pos ), $new, array_slice( $array, $pos ) );
-}
-endif;
-/* Excerpt row */
-if (!function_exists('wpqa_excerpt_row')) :
-	function wpqa_excerpt_row($excerpt_length,$content) {
-		$words = explode(' ',$content,$excerpt_length + 1);
-		if (count($words) > $excerpt_length) :
-			array_pop($words);
-			array_push($words,'...');
-			$content = implode(' ',$words).'...';
-		endif;
+	endif;
+	/* Excerpt row */
+	if (!function_exists('wpqa_excerpt_row')) :
+		function wpqa_excerpt_row($excerpt_length,$content) {
+			$words = explode(' ',$content,$excerpt_length + 1);
+			if (count($words) > $excerpt_length) :
+				array_pop($words);
+				array_push($words,'...');
+				$content = implode(' ',$words).'...';
+			endif;
 			$content = strip_tags($content);
-		echo ($content);
-	}
-endif;
-/* Excerpt title row */
-if (!function_exists('wpqa_excerpt_title_row')) :
-	function wpqa_excerpt_title_row($excerpt_length,$title) {
-		$words = explode(' ',$title,$excerpt_length + 1);
-		if (count($words) > $excerpt_length) :
-			array_pop($words);
-			array_push($words,'');
-			$title = implode(' ',$words).'...';
-		endif;
-			$title = strip_tags($title);
-		echo ($title);
-	}
-endif;
-/* Excerpts */
-if (!defined("wpqa_excerpt_type")) {
-	define("wpqa_excerpt_type",wpqa_options("excerpt_type"));
-}
-if (!function_exists('wpqa_excerpt_title')) :
-	function wpqa_excerpt_title ($excerpt_length,$excerpt_type = wpqa_excerpt_type,$return = "") {
-		global $post;
-		$title = "";
-		$excerpt_length = ((isset($excerpt_length) && $excerpt_length != "") || $excerpt_length == 0?$excerpt_length:5);
-		if ($excerpt_length > 0) {
-			$title = $post->post_title;
+			echo ($content);
 		}
-		if ($excerpt_type == "characters") {
-			$title = mb_substr($title,0,$excerpt_length,"UTF-8");
-		}else {
+	endif;
+	/* Excerpt title row */
+	if (!function_exists('wpqa_excerpt_title_row')) :
+		function wpqa_excerpt_title_row($excerpt_length,$title) {
 			$words = explode(' ',$title,$excerpt_length + 1);
 			if (count($words) > $excerpt_length) :
 				array_pop($words);
 				array_push($words,'');
-				$title = implode(' ',$words);
+				$title = implode(' ',$words).'...';
 			endif;
+			$title = strip_tags($title);
+			echo ($title);
 		}
-		$title = strip_tags($title);
-		if ($return == "return") {
-			return esc_attr($title);
-		}else {
-			echo esc_attr($title);
-		}
+	endif;
+	/* Excerpts */
+	if (!defined("wpqa_excerpt_type")) {
+		define("wpqa_excerpt_type",wpqa_options("excerpt_type"));
 	}
-endif;
-if (!function_exists('wpqa_excerpt')) :
-	function wpqa_excerpt ($excerpt_length,$excerpt_type = wpqa_excerpt_type,$return = "") {
-		global $post;
-		$content = "";
-		$excerpt_length = ((isset($excerpt_length) && $excerpt_length != "") || $excerpt_length == 0?$excerpt_length:5);
-		if ($excerpt_length > 0) {
-			$content = $post->post_content;
-		}
-		if ($excerpt_type == "characters") {
-			$content = mb_substr($content,0,$excerpt_length,"UTF-8");
-		}else {
-			$words = explode(' ',$content,$excerpt_length + 1);
-			if (count($words) > $excerpt_length) :
-				array_pop($words);
-				array_push($words,'');
-				$content = implode(' ',$words);
-			endif;
-		}
-		$content = strip_tags($content);
-		if ($return == "return") {
-			return esc_attr($content);
-		}else {
-			echo esc_attr($content);
-		}
-	}
-endif;
-/* Before delete user */
-add_action('delete_user','wpqa_before_delete_user');
-if (!function_exists('wpqa_before_delete_user')) :
-	function wpqa_before_delete_user($user_id) {
-		$active_points = wpqa_options("active_points");
-		$point_following_me = wpqa_options("point_following_me");
-		$point_following_me = ($point_following_me != ""?$point_following_me:1);
-		
-		$following_me = get_user_meta($user_id,"following_me",true);
-		if (isset($following_me) && is_array($following_me)) {
-			foreach ($following_me as $key => $value) {
-				$following_me = get_user_meta($value,"following_me",true);
-				$remove_following_me = wpqa_remove_item_by_value($following_me,$user_id);
-				update_user_meta($value,"following_me",$remove_following_me);
-				if ($active_points == "on") {
-					wpqa_add_points($value,$point_following_me,"-","delete_follow_user");
-				}
-				
-				$following_you = get_user_meta($value,"following_you",true);
-				$remove_following_you = wpqa_remove_item_by_value($following_you,$user_id);
-				update_user_meta($value,"following_you",$remove_following_you);
+	if (!function_exists('wpqa_excerpt_title')) :
+		function wpqa_excerpt_title ($excerpt_length,$excerpt_type = wpqa_excerpt_type,$return = "") {
+			global $post;
+			$title = "";
+			$excerpt_length = ((isset($excerpt_length) && $excerpt_length != "") || $excerpt_length == 0?$excerpt_length:5);
+			if ($excerpt_length > 0) {
+				$title = $post->post_title;
+			}
+			if ($excerpt_type == "characters") {
+				$title = mb_substr($title,0,$excerpt_length,"UTF-8");
+			}else {
+				$words = explode(' ',$title,$excerpt_length + 1);
+				if (count($words) > $excerpt_length) :
+					array_pop($words);
+					array_push($words,'');
+					$title = implode(' ',$words);
+				endif;
+			}
+			$title = strip_tags($title);
+			if ($return == "return") {
+				return esc_attr($title);
+			}else {
+				echo esc_attr($title);
 			}
 		}
-	}
-endif;
-/* Action delete post */
-if (!function_exists('wpqa_delete_post')) :
-	function wpqa_delete_post() {
-		if (isset($_GET['wpqa_delete_nonce']) && wp_verify_nonce($_GET['wpqa_delete_nonce'],'wpqa_delete_nonce') && !is_admin() && isset($_GET["delete"]) && $_GET["delete"] != "") {
-			$post_id   = (int)$_GET["delete"];
-			$get_post  = get_post($post_id);
-			$post_type = $get_post->post_type;
-			$filter_delete_post = apply_filters("wpqa_filter_delete_post",true,$post_id);
-			if ($filter_delete_post == true && isset($post_id) && $post_id != "" && isset($get_post->post_status) && $get_post->post_status == "publish" && ($post_type == "post" || $post_type == "question")) {
-				$post_author  = $get_post->post_author;
-				$user_id      = get_current_user_id();
-				$delete_post  = wpqa_options($post_type."_delete");
-				$delete_trush = wpqa_options("delete_".$post_type);
-				if (($post_author != 0 && $post_author == $user_id && $delete_post == "on") || is_super_admin($user_id)) {
-					if ($user_id > 0) {
-						wpqa_notifications_activities($user_id,"","","","","delete_".$post_type,"activities","",$post_type);
+	endif;
+	if (!function_exists('wpqa_excerpt')) :
+		function wpqa_excerpt ($excerpt_length,$excerpt_type = wpqa_excerpt_type,$return = "") {
+			global $post;
+			$content = "";
+			$excerpt_length = ((isset($excerpt_length) && $excerpt_length != "") || $excerpt_length == 0?$excerpt_length:5);
+			if ($excerpt_length > 0) {
+				$content = $post->post_content;
+			}
+			if ($excerpt_type == "characters") {
+				$content = mb_substr($content,0,$excerpt_length,"UTF-8");
+			}else {
+				$words = explode(' ',$content,$excerpt_length + 1);
+				if (count($words) > $excerpt_length) :
+					array_pop($words);
+					array_push($words,'');
+					$content = implode(' ',$words);
+				endif;
+			}
+			$content = strip_tags($content);
+			if ($return == "return") {
+				return esc_attr($content);
+			}else {
+				echo esc_attr($content);
+			}
+		}
+	endif;
+	/* Before delete user */
+	add_action('delete_user','wpqa_before_delete_user');
+	if (!function_exists('wpqa_before_delete_user')) :
+		function wpqa_before_delete_user($user_id) {
+			$active_points = wpqa_options("active_points");
+			$point_following_me = wpqa_options("point_following_me");
+			$point_following_me = ($point_following_me != ""?$point_following_me:1);
+
+			$following_me = get_user_meta($user_id,"following_me",true);
+			if (isset($following_me) && is_array($following_me)) {
+				foreach ($following_me as $key => $value) {
+					$following_me = get_user_meta($value,"following_me",true);
+					$remove_following_me = wpqa_remove_item_by_value($following_me,$user_id);
+					update_user_meta($value,"following_me",$remove_following_me);
+					if ($active_points == "on") {
+						wpqa_add_points($value,$point_following_me,"-","delete_follow_user");
 					}
-					wp_delete_post($post_id,($delete_trush == "trash"?false:true));
-					wpqa_session('<div class="alert-message success"><i class="icon-check"></i><p>'.esc_html__("Has been deleted successfully.","wpqa").'</p></div>','wpqa_session');
-					$protocol    = is_ssl() ? 'https' : 'http';
-					$redirect_to = wp_unslash( $protocol.'://'.wpqa_server('HTTP_HOST').wpqa_server('REQUEST_URI'));
-					$redirect_to = (isset($_GET["page"]) && esc_attr($_GET["page"]) != ""?esc_attr($_GET["page"]):$redirect_to);
-					if ( is_ssl() && force_ssl_admin() && !force_ssl_admin() && ( 0 !== strpos($redirect_to, 'https') ) && ( 0 === strpos($redirect_to, 'http') ) )$secure_cookie = false; else $secure_cookie = '';
-					wp_redirect(((isset($_GET["page"]) && esc_attr($_GET["page"]) != "") || is_page()?site_url("/").$redirect_to:home_url()));
-					exit;
+
+					$following_you = get_user_meta($value,"following_you",true);
+					$remove_following_you = wpqa_remove_item_by_value($following_you,$user_id);
+					update_user_meta($value,"following_you",$remove_following_you);
 				}
 			}
 		}
-	}
-endif;
-add_action('wpqa_init','wpqa_delete_post');
-/* Transition the post status */
-add_action('transition_post_status','wpqa_run_on_update_post',10,3);
-if (!function_exists('wpqa_run_on_update_post')) :
-	function wpqa_run_on_update_post($new_status,$old_status,$post) {
-		if (is_admin()) {
-			if ($post->post_type == "question" || $post->post_type == "post" || $post->post_type == "message") {
-				$post_from_front = get_post_meta($post->ID,'post_from_front',true);
-				if ($post->post_type == "question") {
-					$user_id = get_post_meta($post->ID,"user_id",true);
-					$anonymously_user = get_post_meta($post->ID,"anonymously_user",true);
-					$question_username = get_post_meta($post->ID,'question_username',true);
-					$question_email = get_post_meta($post->ID,'question_email',true);
-					if ($question_username == "") {
-						$question_no_username = get_post_meta($post->ID,'question_no_username',true);
+	endif;
+	/* Action delete post */
+	if (!function_exists('wpqa_delete_post')) :
+		function wpqa_delete_post() {
+			if (isset($_GET['wpqa_delete_nonce']) && wp_verify_nonce($_GET['wpqa_delete_nonce'],'wpqa_delete_nonce') && !is_admin() && isset($_GET["delete"]) && $_GET["delete"] != "") {
+				$post_id   = (int)$_GET["delete"];
+				$get_post  = get_post($post_id);
+				$post_type = $get_post->post_type;
+				$filter_delete_post = apply_filters("wpqa_filter_delete_post",true,$post_id);
+				if ($filter_delete_post == true && isset($post_id) && $post_id != "" && isset($get_post->post_status) && $get_post->post_status == "publish" && ($post_type == "post" || $post_type == "question")) {
+					$post_author  = $get_post->post_author;
+					$user_id      = get_current_user_id();
+					$delete_post  = wpqa_options($post_type."_delete");
+					$delete_trush = wpqa_options("delete_".$post_type);
+					if (($post_author != 0 && $post_author == $user_id && $delete_post == "on") || is_super_admin($user_id)) {
+						if ($user_id > 0) {
+							wpqa_notifications_activities($user_id,"","","","","delete_".$post_type,"activities","",$post_type);
+						}
+						wp_delete_post($post_id,($delete_trush == "trash"?false:true));
+						wpqa_session('<div class="alert-message success"><i class="icon-check"></i><p>'.esc_html__("Has been deleted successfully.","wpqa").'</p></div>','wpqa_session');
+						$protocol    = is_ssl() ? 'https' : 'http';
+						$redirect_to = wp_unslash( $protocol.'://'.wpqa_server('HTTP_HOST').wpqa_server('REQUEST_URI'));
+						$redirect_to = (isset($_GET["page"]) && esc_attr($_GET["page"]) != ""?esc_attr($_GET["page"]):$redirect_to);
+						if ( is_ssl() && force_ssl_admin() && !force_ssl_admin() && ( 0 !== strpos($redirect_to, 'https') ) && ( 0 === strpos($redirect_to, 'http') ) )$secure_cookie = false; else $secure_cookie = '';
+						wp_redirect(((isset($_GET["page"]) && esc_attr($_GET["page"]) != "") || is_page()?site_url("/").$redirect_to:home_url()));
+						exit;
 					}
 				}
-				if ($post->post_type == "post") {
-					$post_username = get_post_meta($post->ID,'post_username',true);
-					$post_email = get_post_meta($post->ID,'post_email',true);
-				}
-				if ($post->post_type == "message") {
-					$message_username = get_post_meta($post->ID,'message_username',true);
-					$message_email = get_post_meta($post->ID,'message_email',true);
-				}
-				
-				if ((isset($anonymously_user) && $anonymously_user > 0) || (isset($question_no_username) && $question_no_username == "no_user") || (isset($question_username) && $question_username != "" && isset($question_email) && $question_email != "") || (isset($post_username) && $post_username != "" && isset($post_email) && $post_email != "") || (isset($message_username) && $message_username != "" && isset($message_email) && $message_email != "")) {
-					$not_user = 0;
-				}else {
-					$not_user = $post->post_author;
-				}
-				
-				$post_approved_before = get_post_meta($post->ID,'post_approved_before',true);
-				if ($post_approved_before != "yes") {
-					if ('publish' == $new_status && $post->post_type == "message") {
-						update_post_meta($post->ID,'post_approved_before',"yes");
-						$get_message_user = get_post_meta($post->ID,'message_user_id',true);
-						$send_email_message = wpqa_options("send_email_message");
-						if ($post->post_author != $get_message_user && $get_message_user > 0) {
-							$header_messages = wpqa_options("header_messages");
-							$header_style = wpqa_options("header_style");
-							$show_message_area = ($header_messages == "on" && $header_style == "simple"?"on":0);
-							wpqa_notifications_activities($get_message_user,$post->post_author,($post->post_author == 0?$get_message_user:""),"","","add_message_user","notifications","","message",($show_message_area === "on"?false:true));
-						}
-						if ($not_user > 0) {
-							wpqa_notifications_activities($not_user,"","","","","approved_message","notifications");
-							wpqa_notifications_activities($not_user,$get_message_user,"","","","add_message","activities","","message");
-						}
-						
-						if ($send_email_message == "on") {
-							$send_text = wpqa_send_email(wpqa_options("email_new_message"),$get_message_user,$post->ID);
-							$last_message_email = wpqa_email_code($send_text);
-							$user = get_userdata($get_message_user);
-							$email_title = wpqa_options("title_new_message");
-							$email_title = ($email_title != ""?$email_title:esc_html__("New message","wpqa"));
-							wpqa_sendEmail(wpqa_options("email_template"),get_bloginfo('name'),esc_html($user->user_email),esc_html($user->display_name),$email_title,$last_message_email);
+			}
+		}
+	endif;
+	add_action('wpqa_init','wpqa_delete_post');
+	/* Transition the post status */
+	add_action('transition_post_status','wpqa_run_on_update_post',10,3);
+	if (!function_exists('wpqa_run_on_update_post')) :
+		function wpqa_run_on_update_post($new_status,$old_status,$post) {
+			if (is_admin()) {
+				if ($post->post_type == "question" || $post->post_type == "post" || $post->post_type == "message") {
+					$post_from_front = get_post_meta($post->ID,'post_from_front',true);
+					if ($post->post_type == "question") {
+						$user_id = get_post_meta($post->ID,"user_id",true);
+						$anonymously_user = get_post_meta($post->ID,"anonymously_user",true);
+						$question_username = get_post_meta($post->ID,'question_username',true);
+						$question_email = get_post_meta($post->ID,'question_email',true);
+						if ($question_username == "") {
+							$question_no_username = get_post_meta($post->ID,'question_no_username',true);
 						}
 					}
-					if ('publish' == $new_status && isset($post_from_front) && $post_from_front == "from_front" && ($post->post_type == "question" || $post->post_type == "post")) {
-						if ($not_user > 0 || $anonymously_user > 0) {
-							if ($post->post_type == "question") {
-								wpqa_notifications_activities(($anonymously_user > 0?$anonymously_user:$not_user),"","",$post->ID,"","approved_question","notifications","","question");
-								if ($post->post_author != $user_id && $user_id > 0) {
-									wpqa_notifications_activities($user_id,($anonymously_user > 0?0:$not_user),"",$post->ID,"","add_question_user","notifications","","question");
-								}
-							}else if ($not_user > 0) {
-								wpqa_notifications_activities($not_user,"","",$post->ID,"","approved_post","notifications");
+					if ($post->post_type == "post") {
+						$post_username = get_post_meta($post->ID,'post_username',true);
+						$post_email = get_post_meta($post->ID,'post_email',true);
+					}
+					if ($post->post_type == "message") {
+						$message_username = get_post_meta($post->ID,'message_username',true);
+						$message_email = get_post_meta($post->ID,'message_email',true);
+					}
+
+					if ((isset($anonymously_user) && $anonymously_user > 0) || (isset($question_no_username) && $question_no_username == "no_user") || (isset($question_username) && $question_username != "" && isset($question_email) && $question_email != "") || (isset($post_username) && $post_username != "" && isset($post_email) && $post_email != "") || (isset($message_username) && $message_username != "" && isset($message_email) && $message_email != "")) {
+						$not_user = 0;
+					}else {
+						$not_user = $post->post_author;
+					}
+
+					$post_approved_before = get_post_meta($post->ID,'post_approved_before',true);
+					if ($post_approved_before != "yes") {
+						if ('publish' == $new_status && $post->post_type == "message") {
+							update_post_meta($post->ID,'post_approved_before',"yes");
+							$get_message_user = get_post_meta($post->ID,'message_user_id',true);
+							$send_email_message = wpqa_options("send_email_message");
+							if ($post->post_author != $get_message_user && $get_message_user > 0) {
+								$header_messages = wpqa_options("header_messages");
+								$header_style = wpqa_options("header_style");
+								$show_message_area = ($header_messages == "on" && $header_style == "simple"?"on":0);
+								wpqa_notifications_activities($get_message_user,$post->post_author,($post->post_author == 0?$get_message_user:""),"","","add_message_user","notifications","","message",($show_message_area === "on"?false:true));
+							}
+							if ($not_user > 0) {
+								wpqa_notifications_activities($not_user,"","","","","approved_message","notifications");
+								wpqa_notifications_activities($not_user,$get_message_user,"","","","add_message","activities","","message");
+							}
+
+							if ($send_email_message == "on") {
+								$send_text = wpqa_send_email(wpqa_options("email_new_message"),$get_message_user,$post->ID);
+								$last_message_email = wpqa_email_code($send_text);
+								$user = get_userdata($get_message_user);
+								$email_title = wpqa_options("title_new_message");
+								$email_title = ($email_title != ""?$email_title:esc_html__("New message","wpqa"));
+								wpqa_sendEmail(wpqa_options("email_template"),get_bloginfo('name'),esc_html($user->user_email),esc_html($user->display_name),$email_title,$last_message_email);
 							}
 						}
-						
-						if ($post->post_type == "question") {
-							wpqa_notifications_add_question($post->ID,$question_username,$user_id,$not_user,$anonymously_user,"admin");
-							wpqa_post_publish($post->ID,$post->post_type,$question_username,$user_id,$not_user,$anonymously_user,"admin");
+						if ('publish' == $new_status && isset($post_from_front) && $post_from_front == "from_front" && ($post->post_type == "question" || $post->post_type == "post")) {
+							if ($not_user > 0 || $anonymously_user > 0) {
+								if ($post->post_type == "question") {
+									wpqa_notifications_activities(($anonymously_user > 0?$anonymously_user:$not_user),"","",$post->ID,"","approved_question","notifications","","question");
+									if ($post->post_author != $user_id && $user_id > 0) {
+										wpqa_notifications_activities($user_id,($anonymously_user > 0?0:$not_user),"",$post->ID,"","add_question_user","notifications","","question");
+									}
+								}else if ($not_user > 0) {
+									wpqa_notifications_activities($not_user,"","",$post->ID,"","approved_post","notifications");
+								}
+							}
+
+							if ($post->post_type == "question") {
+								wpqa_notifications_add_question($post->ID,$question_username,$user_id,$not_user,$anonymously_user,"admin");
+								wpqa_post_publish($post->ID,$post->post_type,$question_username,$user_id,$not_user,$anonymously_user,"admin");
+							}
+
+							if ($post->post_type == "post") {
+								wpqa_post_publish($post->ID,$post->post_type,$post_username,"",$not_user,"","admin");
+							}
+							update_post_meta($post->ID,'post_approved_before',"yes");
 						}
-						
-						if ($post->post_type == "post") {
-							wpqa_post_publish($post->ID,$post->post_type,$post_username,"",$not_user,"","admin");
-						}
-						update_post_meta($post->ID,'post_approved_before',"yes");
 					}
 				}
 			}
 		}
-	}
-endif;
-/* Save post */
-add_action('save_post','wpqa_save_post',10,3);
-if (!function_exists('wpqa_save_post')) :
-	function wpqa_save_post($post_id) {
-		if (is_admin()) {
-			$post_data = get_post($post_id);
-			if ($post_data->post_type == "question" || $post_data->post_type == "post" || $post_data->post_type == "message") {
-				if ($post_data->post_type == "question") {
-					$question_username = get_post_meta($post_id,'question_username',true);
-					$question_email = get_post_meta($post_id,'question_email',true);
-					$anonymously_user = get_post_meta($post_id,'anonymously_user',true);
-					if ($question_username == "") {
-						$question_no_username = get_post_meta($post_id,'question_no_username',true);
+	endif;
+	/* Save post */
+	add_action('save_post','wpqa_save_post',10,3);
+	if (!function_exists('wpqa_save_post')) :
+		function wpqa_save_post($post_id) {
+			if (is_admin()) {
+				$post_data = get_post($post_id);
+				if ($post_data->post_type == "question" || $post_data->post_type == "post" || $post_data->post_type == "message") {
+					if ($post_data->post_type == "question") {
+						$question_username = get_post_meta($post_id,'question_username',true);
+						$question_email = get_post_meta($post_id,'question_email',true);
+						$anonymously_user = get_post_meta($post_id,'anonymously_user',true);
+						if ($question_username == "") {
+							$question_no_username = get_post_meta($post_id,'question_no_username',true);
+						}
 					}
-				}
-				if ($post_data->post_type == "post") {
-					$post_username = get_post_meta($post_id,'post_username',true);
-					$post_email = get_post_meta($post_id,'post_email',true);
-				}
-				if ($post_data->post_type == "message") {
-					$message_username = get_post_meta($post_id,'message_username',true);
-					$message_email = get_post_meta($post_id,'message_email',true);
-				}
-				
-				if ((isset($anonymously_user) && $anonymously_user != "") || (isset($question_no_username) && $question_no_username == "no_user") || (isset($question_username) && $question_username != "" && isset($question_email) && $question_email != "") || (isset($post_username) && $post_username != "" && isset($post_email) && $post_email != "") || (isset($message_username) && $message_username != "" && isset($message_email) && $message_email != "")) {
-					$data = array(
-						'ID' => $post_id,
-						'post_author' => 0,
-					);
-					
-					remove_action('save_post', 'wpqa_save_post');
-					$post_id = wp_update_post($data);
-					add_action('save_post', 'wpqa_save_post');
+					if ($post_data->post_type == "post") {
+						$post_username = get_post_meta($post_id,'post_username',true);
+						$post_email = get_post_meta($post_id,'post_email',true);
+					}
+					if ($post_data->post_type == "message") {
+						$message_username = get_post_meta($post_id,'message_username',true);
+						$message_email = get_post_meta($post_id,'message_email',true);
+					}
+
+					if ((isset($anonymously_user) && $anonymously_user != "") || (isset($question_no_username) && $question_no_username == "no_user") || (isset($question_username) && $question_username != "" && isset($question_email) && $question_email != "") || (isset($post_username) && $post_username != "" && isset($post_email) && $post_email != "") || (isset($message_username) && $message_username != "" && isset($message_email) && $message_email != "")) {
+						$data = array(
+							'ID' => $post_id,
+							'post_author' => 0,
+						);
+
+						remove_action('save_post', 'wpqa_save_post');
+						$post_id = wp_update_post($data);
+						add_action('save_post', 'wpqa_save_post');
+					}
 				}
 			}
 		}
-	}
-endif;
-/* Get comment */
-if (!function_exists('wpqa_comment')) :
-	function wpqa_comment($comment,$args,$depth,$answer = "",$owner = "",$k_ad = "",$best_answer = "",$answer_args = array()) {
-		if ($answer != "answer") {
-			global $post;
-			if ($k_ad == "") {
-				global $k_ad;
+	endif;
+	/* Get comment */
+	if (!function_exists('wpqa_comment')) :
+		function wpqa_comment($comment,$args,$depth,$answer = "",$owner = "",$k_ad = "",$best_answer = "",$answer_args = array()) {
+			if ($answer != "answer") {
+				global $post;
+				if ($k_ad == "") {
+					global $k_ad;
+				}
+				if ($comment->comment_parent == 0) {
+					$k_ad++;
+				}
 			}
-			if ($comment->comment_parent == 0) {
+			$user_get_current_user_id = get_current_user_id();
+			$comment_id = esc_attr($comment->comment_ID);
+			if (($answer != "answer" && isset($post->post_type) && $post->post_type == 'question') || ($answer == "answer" && get_post_type($comment->comment_post_ID))) {
+				$its_question = "question";
+				$the_best_answer = get_post_meta(($answer == "answer"?$comment->comment_post_ID:$post->ID),"the_best_answer",true);
+				$best_answer_comment = get_comment_meta($comment_id,"best_answer_comment",true);
+				$comment_best_answer = ($best_answer_comment == "best_answer_comment" || $the_best_answer == $comment_id?"comment-best-answer":"");
+				$active_reports = wpqa_options("active_reports");
+				$active_logged_reports = wpqa_options("active_logged_reports");
+				$active_vote = wpqa_options("active_vote");
+				$active_vote_unlogged = wpqa_options("active_vote_unlogged");
+				$active_best_answer = wpqa_options("active_best_answer");
+			}
+
+			if (isset($its_question) && $its_question == "question") {
+				$comment_vote = get_comment_meta($comment_id,'comment_vote',true);
+				if (isset($comment_vote) && is_array($comment_vote) && isset($comment_vote["vote"])) {
+					update_comment_meta($comment_id,'comment_vote',$comment_vote["vote"]);
+					$comment_vote = get_comment_meta($comment_id,'comment_vote',true);
+				}else if ($comment_vote == "") {
+					update_comment_meta($comment_id,'comment_vote',0);
+					$comment_vote = get_comment_meta($comment_id,'comment_vote',true);
+				}
+			}
+			$can_delete_comment = wpqa_options("can_delete_comment");
+			$can_edit_comment = wpqa_options("can_edit_comment");
+			$can_edit_comment_after = wpqa_options("can_edit_comment_after");
+			$can_edit_comment_after = (int)(isset($can_edit_comment_after) && $can_edit_comment_after > 0?$can_edit_comment_after:0);
+			if (version_compare(phpversion(), '5.3.0', '>')) {
+				$time_now = strtotime(current_time( 'mysql' ),date_create_from_format('Y-m-d H:i',current_time( 'mysql' )));
+			}else {
+				list($year, $month, $day, $hour, $minute, $second) = sscanf(current_time( 'mysql' ), '%04d-%02d-%02d %02d:%02d:%02d');
+				$datetime = new DateTime("$year-$month-$day $hour:$minute:$second");
+				$time_now = strtotime($datetime->format('r'));
+			}
+			$time_edit_comment = strtotime('+'.$can_edit_comment_after.' hour',strtotime($comment->comment_date));
+			$time_end = ($time_now-$time_edit_comment)/60/60;
+			$edit_comment = get_comment_meta($comment_id,"edit_comment",true);
+			$between_comments_position = wpqa_options("between_comments_position");
+			$adv_type_repeat   = wpqa_options("between_comments_adv_type_repeat");
+			if (isset($k_ad) && (($k_ad == $between_comments_position) || ($adv_type_repeat == "on" && $k_ad != 0 && $k_ad % $between_comments_position == 0))) {
+				if (function_exists('discy_ads')) {
+					echo discy_ads("between_comments_adv_type","between_comments_adv_code","between_comments_adv_href","between_comments_adv_img","li","","","on");
+				}
+			}
+
+			if ($answer == "answer") {
 				$k_ad++;
 			}
-		}
-	    $user_get_current_user_id = get_current_user_id();
-	    $comment_id = esc_attr($comment->comment_ID);
-	    if (($answer != "answer" && isset($post->post_type) && $post->post_type == 'question') || ($answer == "answer" && get_post_type($comment->comment_post_ID))) {
-	    	$its_question = "question";
-	    	$the_best_answer = get_post_meta(($answer == "answer"?$comment->comment_post_ID:$post->ID),"the_best_answer",true);
-	    	$best_answer_comment = get_comment_meta($comment_id,"best_answer_comment",true);
-	    	$comment_best_answer = ($best_answer_comment == "best_answer_comment" || $the_best_answer == $comment_id?"comment-best-answer":"");
-	    	$active_reports = wpqa_options("active_reports");
-	    	$active_logged_reports = wpqa_options("active_logged_reports");
-	    	$active_vote = wpqa_options("active_vote");
-	    	$active_vote_unlogged = wpqa_options("active_vote_unlogged");
-    		$active_best_answer = wpqa_options("active_best_answer");
-	    }
-	    
-	    if (isset($its_question) && $its_question == "question") {
-	    	$comment_vote = get_comment_meta($comment_id,'comment_vote',true);
-	    	if (isset($comment_vote) && is_array($comment_vote) && isset($comment_vote["vote"])) {
-	    		update_comment_meta($comment_id,'comment_vote',$comment_vote["vote"]);
-	    		$comment_vote = get_comment_meta($comment_id,'comment_vote',true);
-	    	}else if ($comment_vote == "") {
-	    		update_comment_meta($comment_id,'comment_vote',0);
-	    		$comment_vote = get_comment_meta($comment_id,'comment_vote',true);
-	    	}
-	    }
-	    $can_delete_comment = wpqa_options("can_delete_comment");
-	    $can_edit_comment = wpqa_options("can_edit_comment");
-	    $can_edit_comment_after = wpqa_options("can_edit_comment_after");
-	    $can_edit_comment_after = (int)(isset($can_edit_comment_after) && $can_edit_comment_after > 0?$can_edit_comment_after:0);
-	    if (version_compare(phpversion(), '5.3.0', '>')) {
-	    	$time_now = strtotime(current_time( 'mysql' ),date_create_from_format('Y-m-d H:i',current_time( 'mysql' )));
-	    }else {
-	    	list($year, $month, $day, $hour, $minute, $second) = sscanf(current_time( 'mysql' ), '%04d-%02d-%02d %02d:%02d:%02d');
-	    	$datetime = new DateTime("$year-$month-$day $hour:$minute:$second");
-	    	$time_now = strtotime($datetime->format('r'));
-	    }
-	    $time_edit_comment = strtotime('+'.$can_edit_comment_after.' hour',strtotime($comment->comment_date));
-	    $time_end = ($time_now-$time_edit_comment)/60/60;
-	    $edit_comment = get_comment_meta($comment_id,"edit_comment",true);
-	    $between_comments_position = wpqa_options("between_comments_position");
-	    $adv_type_repeat   = wpqa_options("between_comments_adv_type_repeat");
-	    if (isset($k_ad) && (($k_ad == $between_comments_position) || ($adv_type_repeat == "on" && $k_ad != 0 && $k_ad % $between_comments_position == 0))) {
-	    	if (function_exists('discy_ads')) {
-	    		echo discy_ads("between_comments_adv_type","between_comments_adv_code","between_comments_adv_href","between_comments_adv_img","li","","","on");
-	    	}
-	    }
-	    
-	    if ($answer == "answer") {
-	    	$k_ad++;
-	    }
-	    $answer_question_style = wpqa_options("answer_question_style");
-	    $profile_credential = get_the_author_meta('profile_credential',$comment->user_id);?>
-	    <li <?php comment_class('comment comment-with-title '.($answer_question_style != ""?"comment-with-title-".str_replace('style_','',$answer_question_style):"").($profile_credential != ""?" comment-credential ":"").(isset($its_question) && $its_question == "question"?" ".$comment_best_answer:''),$comment_id);echo (isset($its_question) && $its_question == 'question' && is_single()?' itemscope itemtype="https://schema.org/Answer"'.($best_answer_comment == 'best_answer_comment' || $the_best_answer == $comment_id?' itemprop="acceptedAnswer"':' itemprop="suggestedAnswer"'):'');?> id="li-comment-<?php echo esc_attr($comment_id);?>">
-	    	<div id="comment-<?php echo esc_attr($comment_id);?>" class="comment-body clearfix">
-	            <?php if (isset($answer_args['custom_home_answer']) && $answer_args['custom_home_answer'] == "on") {
-	            	$answer_image         = get_post_meta($answer_args['answer_question_id'],prefix_meta.'answers_image_h',true);
-	            	$active_vote_answer   = get_post_meta($answer_args['answer_question_id'],prefix_meta.'active_vote_answer_h',true);
-	            	$show_dislike_answers = get_post_meta($answer_args['answer_question_id'],prefix_meta.'show_dislike_answers_h',true);
-	            }else if (isset($answer_args['custom_answers']) && $answer_args['custom_answers'] == "on") {
-	            	$answer_image         = get_post_meta($answer_args['answer_question_id'],prefix_meta.'answers_image_a',true);
-	            	$active_vote_answer   = get_post_meta($answer_args['answer_question_id'],prefix_meta.'active_vote_answer_a',true);
-	            	$show_dislike_answers = get_post_meta($answer_args['answer_question_id'],prefix_meta.'show_dislike_answers_a',true);
-	            }else {
-	            	$answer_image         = wpqa_options("answer_image");
-	            	$active_vote_answer   = wpqa_options("active_vote_answer");
-	            	$show_dislike_answers = wpqa_options("show_dislike_answers");
-	            }
-	            echo '<div class="comment-question-title"><header class="article-header"><div class="question-header"><div class="post-meta">';
-	            	if (function_exists('discy_meta')) {
-	            		discy_meta("on","on","","","","",$comment->comment_post_ID);
-	            	}
-            	echo '</div></div></header>
-            	<div class="clearfix"></div>
-	            <h2 class="post-title"><a class="post-title" href="' . esc_url( get_permalink($comment->comment_post_ID) ) . '" rel="bookmark">'.get_the_title($comment->comment_post_ID).'</a></h2></div>';?>
-	            <div class="comment-text">
-	            	<?php if ($answer_image == "on") {
-		            	do_action("wpqa_action_avatar_link",array("user_id" => ($comment->user_id > 0?$comment->user_id:0),"size" => 42,"span" => "span","pop" => "pop","comment" => $comment,"email" => ($comment->user_id > 0?"":$comment->comment_author_email)));
-		            }?>
-	                <div class="author clearfix">
-	                	<?php if ($best_answer == "" && isset($its_question) && $its_question == "question" && ($best_answer_comment == "best_answer_comment" || $the_best_answer == $comment_id)) {?>
-	                		<div class="best-answer"><?php esc_html_e("Best Answer","wpqa")?></div>
-	                	<?php }?>
-	                	<div class="comment-meta">
-	                    	<div class="comment-author">
-	                    		<?php $wpqa_activate_comment_author = apply_filters('wpqa_activate_comment_author',true,$comment_id);
-	                    		if ($wpqa_activate_comment_author == true) {
-	                    			if ($comment->user_id > 0) {
-		                    			$wpqa_profile_url = wpqa_profile_url($comment->user_id);
-		                    		}else {
-		                    			$wpqa_profile_url = ($comment->comment_author_url != ""?$comment->comment_author_url:"wpqa_No_site");
-		                    		}
-		                    		if ($wpqa_profile_url != "" && $wpqa_profile_url != "wpqa_No_site") {?>
-		                    			<a href="<?php echo esc_url($wpqa_profile_url)?>">
-		                    		<?php }
-		                        		echo get_comment_author($comment_id);
-		                        	if ($wpqa_profile_url != "" && $wpqa_profile_url != "wpqa_No_site") {?>
-		                        		</a>
-		                        	<?php }
-		                        }
-	                        	if ($comment->user_id != 0) {
-	                        		do_action("wpqa_verified_user",$comment->user_id);
-	                        		$active_points_category = wpqa_options("active_points_category");
-									if ($active_points_category == "on") {
-										$get_terms = wp_get_post_terms($comment->comment_post_ID,'question-category',array('fields' => 'ids'));
-										if (!empty($get_terms) && is_array($get_terms) && isset($get_terms[0])) {
-											$points_category_user = (int)get_user_meta($comment->user_id,"points_category".$get_terms[0],true);
-											echo apply_filters("wpqa_comments_before_badge",false,$get_terms[0]);
+			$answer_question_style = wpqa_options("answer_question_style");
+			$profile_credential = get_the_author_meta('profile_credential',$comment->user_id);?>
+			<li <?php comment_class('comment comment-with-title '.($answer_question_style != ""?"comment-with-title-".str_replace('style_','',$answer_question_style):"").($profile_credential != ""?" comment-credential ":"").(isset($its_question) && $its_question == "question"?" ".$comment_best_answer:''),$comment_id);echo (isset($its_question) && $its_question == 'question' && is_single()?' itemscope itemtype="https://schema.org/Answer"'.($best_answer_comment == 'best_answer_comment' || $the_best_answer == $comment_id?' itemprop="acceptedAnswer"':' itemprop="suggestedAnswer"'):'');?> id="li-comment-<?php echo esc_attr($comment_id);?>">
+				<div id="comment-<?php echo esc_attr($comment_id);?>" class="comment-body clearfix">
+					<?php if (isset($answer_args['custom_home_answer']) && $answer_args['custom_home_answer'] == "on") {
+						$answer_image         = get_post_meta($answer_args['answer_question_id'],prefix_meta.'answers_image_h',true);
+						$active_vote_answer   = get_post_meta($answer_args['answer_question_id'],prefix_meta.'active_vote_answer_h',true);
+						$show_dislike_answers = get_post_meta($answer_args['answer_question_id'],prefix_meta.'show_dislike_answers_h',true);
+					}else if (isset($answer_args['custom_answers']) && $answer_args['custom_answers'] == "on") {
+						$answer_image         = get_post_meta($answer_args['answer_question_id'],prefix_meta.'answers_image_a',true);
+						$active_vote_answer   = get_post_meta($answer_args['answer_question_id'],prefix_meta.'active_vote_answer_a',true);
+						$show_dislike_answers = get_post_meta($answer_args['answer_question_id'],prefix_meta.'show_dislike_answers_a',true);
+					}else {
+						$answer_image         = wpqa_options("answer_image");
+						$active_vote_answer   = wpqa_options("active_vote_answer");
+						$show_dislike_answers = wpqa_options("show_dislike_answers");
+					}
+					echo '<div class="comment-question-title"><header class="article-header"><div class="question-header"><div class="post-meta">';
+					if (function_exists('discy_meta')) {
+						discy_meta("on","on","","","","",$comment->comment_post_ID);
+					}
+					echo '</div></div></header>
+					<div class="clearfix"></div>
+					<h2 class="post-title"><a class="post-title" href="' . esc_url( get_permalink($comment->comment_post_ID) ) . '" rel="bookmark">'.get_the_title($comment->comment_post_ID).'</a></h2></div>';?>
+					<div class="comment-text">
+						<?php if ($answer_image == "on") {
+							do_action("wpqa_action_avatar_link",array("user_id" => ($comment->user_id > 0?$comment->user_id:0),"size" => 42,"span" => "span","pop" => "pop","comment" => $comment,"email" => ($comment->user_id > 0?"":$comment->comment_author_email)));
+						}?>
+						<div class="author clearfix">
+							<?php if ($best_answer == "" && isset($its_question) && $its_question == "question" && ($best_answer_comment == "best_answer_comment" || $the_best_answer == $comment_id)) {?>
+								<div class="best-answer"><?php esc_html_e("Best Answer","wpqa")?></div>
+							<?php }?>
+							<div class="comment-meta">
+								<div class="comment-author">
+									<?php $wpqa_activate_comment_author = apply_filters('wpqa_activate_comment_author',true,$comment_id);
+									if ($wpqa_activate_comment_author == true) {
+										if ($comment->user_id > 0) {
+											$wpqa_profile_url = wpqa_profile_url($comment->user_id);
+										}else {
+											$wpqa_profile_url = ($comment->comment_author_url != ""?$comment->comment_author_url:"wpqa_No_site");
 										}
+										if ($wpqa_profile_url != "" && $wpqa_profile_url != "wpqa_No_site") {?>
+											<a href="<?php echo esc_url($wpqa_profile_url)?>">
+											<?php }
+											echo get_comment_author($comment_id);
+											if ($wpqa_profile_url != "" && $wpqa_profile_url != "wpqa_No_site") {?>
+											</a>
+										<?php }
 									}
-	                        		do_action("wpqa_get_badge",$comment->user_id,"",(isset($points_category_user)?$points_category_user:""));
-	                        	}
-	                        	if ($profile_credential != "") {?>
-	                        		<span class="profile-credential"><?php stripslashes(sanitize_textarea_field($profile_credential))?></span>
-	                        	<?php }?>
-	                    	</div>
-							<?php $date_format = wpqa_options("date_format");
-							$date_format = ($date_format?$date_format:get_option("date_format"));?>
-	                        <a href="<?php echo get_comment_link($comment_id); ?>" class="comment-date">
-	                        	<?php echo (is_single()?'<span itemprop="dateCreated" datetime="'.get_comment_date(discy_date_format,$comment_id).'"></span>':'');
-	                        	if (isset($its_question) && $its_question == "question") {
-	                        		echo ($comment->comment_parent > 0?esc_html__("Replied to","wpqa"):esc_html__("Added an","wpqa"))." ";
-	                        		printf(esc_html__('answer on %1$s at %2$s','wpqa'),get_comment_date($date_format,$comment_id),wpqa_get_comment_time(false,false,false,$comment));
-	                        	}else {
-	                        		echo ($comment->comment_parent > 0?esc_html__("Replied to","wpqa"):esc_html__("Added a","wpqa"))." ";
-	                        		printf(esc_html__('comment on %1$s at %2$s','wpqa'),get_comment_date($date_format,$comment_id),wpqa_get_comment_time(false,false,false,$comment));
-	                        	}?>
-	                        </a> 
-	                    </div><!-- End comment-meta -->
-	                </div><!-- End author -->
-	                <div class="text">
-	                	<?php if ($edit_comment == "edited") {?>
-	                		<em class="comment-edited">
-	                			<?php if (isset($its_question) && $its_question == "question") {
-	                				esc_html_e('This answer was edited.','wpqa');
-	                			}else {
-	                				esc_html_e('This comment was edited.','wpqa');
-	                			}?>
-	                		</em>
-	                	<?php }
-	                	if ($comment->comment_approved == '0') : ?>
-	                	    <em class="comment-awaiting">
-		                	    <?php if (isset($its_question) && $its_question == "question") {
-		                	    	esc_html_e('Your answer is awaiting moderation.','wpqa');
-		                	    }else {
-		                	    	esc_html_e('Your comment is awaiting moderation.','wpqa');
-		                	    }?>
-	                	    </em><br>
-	                	<?php endif;
-	                	
-	                	$featured_image_in_answers = wpqa_options("featured_image_in_answers");
-	                	if ($featured_image_in_answers == "on") {
-	                		$featured_image = get_comment_meta($comment_id,'featured_image',true);
-	                		if (wp_get_attachment_image_srcset($featured_image)) {
-	                			$img_url = wp_get_attachment_url($featured_image,"full");
-	                			$featured_image_answers_lightbox = wpqa_options("featured_image_answers_lightbox");
-	                			$featured_image_answer_width = wpqa_options("featured_image_answer_width");
-	                			$featured_image_answer_height = wpqa_options("featured_image_answer_height");
-	                			$featured_image_answer_width = ($featured_image_answer_width != ""?$featured_image_answer_width:260);
-	                			$featured_image_answer_height = ($featured_image_answer_height != ""?$featured_image_answer_height:185);
-	                			$link_url = ($featured_image_answers_lightbox == "on"?$img_url:get_permalink($comment->comment_post_ID)."#comment-".$comment_id);
-	                			$featured_answer_position = wpqa_options("featured_answer_position");
-	                			if ($featured_answer_position != "after") {
-	                				echo "<div class='featured_image_answer'><a href='".$link_url."'>".wpqa_get_aq_resize_img($featured_image_answer_width,$featured_image_answer_height,"",$featured_image)."</a></div>
-	                				<div class='clearfix'></div>";
-	                			}
-	                		}
-	                	}
+									if ($comment->user_id != 0) {
+										do_action("wpqa_verified_user",$comment->user_id);
+										$active_points_category = wpqa_options("active_points_category");
+										if ($active_points_category == "on") {
+											$get_terms = wp_get_post_terms($comment->comment_post_ID,'question-category',array('fields' => 'ids'));
+											if (!empty($get_terms) && is_array($get_terms) && isset($get_terms[0])) {
+												$points_category_user = (int)get_user_meta($comment->user_id,"points_category".$get_terms[0],true);
+												echo apply_filters("wpqa_comments_before_badge",false,$get_terms[0]);
+											}
+										}
+										do_action("wpqa_get_badge",$comment->user_id,"",(isset($points_category_user)?$points_category_user:""));
+									}
+									if ($profile_credential != "") {?>
+										<span class="profile-credential"><?php stripslashes(sanitize_textarea_field($profile_credential))?></span>
+									<?php }?>
+								</div>
+								<?php $date_format = wpqa_options("date_format");
+								$date_format = ($date_format?$date_format:get_option("date_format"));?>
+								<a href="<?php echo get_comment_link($comment_id); ?>" class="comment-date">
+									<?php echo (is_single()?'<span itemprop="dateCreated" datetime="'.get_comment_date(discy_date_format,$comment_id).'"></span>':'');
+									if (isset($its_question) && $its_question == "question") {
+										echo ($comment->comment_parent > 0?esc_html__("Replied to","wpqa"):esc_html__("Added an","wpqa"))." ";
+										printf(esc_html__('answer on %1$s at %2$s','wpqa'),get_comment_date($date_format,$comment_id),wpqa_get_comment_time(false,false,false,$comment));
+									}else {
+										echo ($comment->comment_parent > 0?esc_html__("Replied to","wpqa"):esc_html__("Added a","wpqa"))." ";
+										printf(esc_html__('comment on %1$s at %2$s','wpqa'),get_comment_date($date_format,$comment_id),wpqa_get_comment_time(false,false,false,$comment));
+									}?>
+								</a> 
+							</div><!-- End comment-meta -->
+						</div><!-- End author -->
+						<div class="text">
+							<?php if ($edit_comment == "edited") {?>
+								<em class="comment-edited">
+									<?php if (isset($its_question) && $its_question == "question") {
+										esc_html_e('This answer was edited.','wpqa');
+									}else {
+										esc_html_e('This comment was edited.','wpqa');
+									}?>
+								</em>
+							<?php }
+							if ($comment->comment_approved == '0') : ?>
+								<em class="comment-awaiting">
+									<?php if (isset($its_question) && $its_question == "question") {
+										esc_html_e('Your answer is awaiting moderation.','wpqa');
+									}else {
+										esc_html_e('Your comment is awaiting moderation.','wpqa');
+									}?>
+								</em><br>
+							<?php endif;
 
-	                	$answer_video = wpqa_options("answer_video");
-	                	$video_answer_position = wpqa_options("video_answer_position");
-	                	$video_answer_width = wpqa_options("video_answer_width");
-						$video_answer_100 = wpqa_options("video_answer_100");
-						$video_answer_height = wpqa_options("video_answer_height");
-	                	$video_answer_description = get_comment_meta($comment_id,"video_answer_description",true);
-						if ($answer_video == "on" && $video_answer_description == "on") {
-							$video_answer_type = get_comment_meta($comment_id,"video_answer_type",true);
-							$video_answer_id = get_comment_meta($comment_id,"video_answer_id",true);
-							if ($video_answer_id != "") {
-								if ($video_answer_type == 'youtube') {
-									$type = "https://www.youtube.com/embed/".$video_answer_id;
-								}else if ($video_answer_type == 'vimeo') {
-									$type = "https://player.vimeo.com/video/".$video_answer_id;
-								}else if ($video_answer_type == 'daily') {
-									$type = "https://www.dailymotion.com/embed/video/".$video_answer_id;
-								}else if ($video_type == 'facebook') {
-									$type = "https://www.facebook.com/video/embed?video_id=".$video_id;
-								}
-								
-								$las_video = '<div class="question-video-loop answer-video'.($video_answer_100 == "on"?' question-video-loop-100':'').($video_answer_position == "after"?' question-video-loop-after':'').'"><iframe frameborder="0" allowfullscreen width="'.$video_answer_width.'" height="'.$video_answer_height.'" src="'.$type.'"></iframe></div>';
-								
-								if ($video_answer_position == "before" && $answer_video == "on" && isset($video_answer_id) && $video_answer_id != "" && $video_answer_description == "on") {
-									echo ($las_video);
+							$featured_image_in_answers = wpqa_options("featured_image_in_answers");
+							if ($featured_image_in_answers == "on") {
+								$featured_image = get_comment_meta($comment_id,'featured_image',true);
+								if (wp_get_attachment_image_srcset($featured_image)) {
+									$img_url = wp_get_attachment_url($featured_image,"full");
+									$featured_image_answers_lightbox = wpqa_options("featured_image_answers_lightbox");
+									$featured_image_answer_width = wpqa_options("featured_image_answer_width");
+									$featured_image_answer_height = wpqa_options("featured_image_answer_height");
+									$featured_image_answer_width = ($featured_image_answer_width != ""?$featured_image_answer_width:260);
+									$featured_image_answer_height = ($featured_image_answer_height != ""?$featured_image_answer_height:185);
+									$link_url = ($featured_image_answers_lightbox == "on"?$img_url:get_permalink($comment->comment_post_ID)."#comment-".$comment_id);
+									$featured_answer_position = wpqa_options("featured_answer_position");
+									if ($featured_answer_position != "after") {
+										echo "<div class='featured_image_answer'><a href='".$link_url."'>".wpqa_get_aq_resize_img($featured_image_answer_width,$featured_image_answer_height,"",$featured_image)."</a></div>
+										<div class='clearfix'></div>";
+									}
 								}
 							}
-						}?>
 
-	                	<div<?php echo (isset($its_question) && $its_question == "question" && is_single()?" itemprop='text'":"")?>>
-	                		<?php echo '<p>'.wp_html_excerpt($comment->comment_content,apply_filters('wpqa_answer_number',300),'<a class="post-read-more" href="'.get_permalink($comment->comment_post_ID).'#comment-'.esc_attr($comment_id).'" rel="bookmark" title="'.esc_attr__('Read more','wpqa').'">'.esc_html__('Read more','wpqa').'</a>').'</p>';?>
-	                	</div>
-	                	<div class="clearfix"></div>
-	                	<?php if ($video_answer_position == "after" && $answer_video == "on" && isset($video_answer_id) && $video_answer_id != "" && $video_answer_description == "on") {
+							$answer_video = wpqa_options("answer_video");
+							$video_answer_position = wpqa_options("video_answer_position");
+							$video_answer_width = wpqa_options("video_answer_width");
+							$video_answer_100 = wpqa_options("video_answer_100");
+							$video_answer_height = wpqa_options("video_answer_height");
+							$video_answer_description = get_comment_meta($comment_id,"video_answer_description",true);
+							if ($answer_video == "on" && $video_answer_description == "on") {
+								$video_answer_type = get_comment_meta($comment_id,"video_answer_type",true);
+								$video_answer_id = get_comment_meta($comment_id,"video_answer_id",true);
+								if ($video_answer_id != "") {
+									if ($video_answer_type == 'youtube') {
+										$type = "https://www.youtube.com/embed/".$video_answer_id;
+									}else if ($video_answer_type == 'vimeo') {
+										$type = "https://player.vimeo.com/video/".$video_answer_id;
+									}else if ($video_answer_type == 'daily') {
+										$type = "https://www.dailymotion.com/embed/video/".$video_answer_id;
+									}else if ($video_type == 'facebook') {
+										$type = "https://www.facebook.com/video/embed?video_id=".$video_id;
+									}
+
+									$las_video = '<div class="question-video-loop answer-video'.($video_answer_100 == "on"?' question-video-loop-100':'').($video_answer_position == "after"?' question-video-loop-after':'').'"><iframe frameborder="0" allowfullscreen width="'.$video_answer_width.'" height="'.$video_answer_height.'" src="'.$type.'"></iframe></div>';
+
+									if ($video_answer_position == "before" && $answer_video == "on" && isset($video_answer_id) && $video_answer_id != "" && $video_answer_description == "on") {
+										echo ($las_video);
+									}
+								}
+							}?>
+
+							<div<?php echo (isset($its_question) && $its_question == "question" && is_single()?" itemprop='text'":"")?>>
+							<?php echo '<p>'.wp_html_excerpt($comment->comment_content,apply_filters('wpqa_answer_number',300),'<a class="post-read-more" href="'.get_permalink($comment->comment_post_ID).'#comment-'.esc_attr($comment_id).'" rel="bookmark" title="'.esc_attr__('Read more','wpqa').'">'.esc_html__('Read more','wpqa').'</a>').'</p>';?>
+						</div>
+						<div class="clearfix"></div>
+						<?php if ($video_answer_position == "after" && $answer_video == "on" && isset($video_answer_id) && $video_answer_id != "" && $video_answer_description == "on") {
 							echo ($las_video);
 						}?>
 						<div class="clearfix"></div>
-	                	<?php if ($featured_image_in_answers == "on" && wp_get_attachment_image_srcset($featured_image) && $featured_answer_position == "after") {
-	                		echo "<div class='featured_image_answer featured_image_after'><a href='".$link_url."'>".wpqa_get_aq_resize_img($featured_image_answer_width,$featured_image_answer_height,"",$featured_image)."</a></div>
-	                		<div class='clearfix'></div>";
-	                	}
-	                	
-	                	if (isset($its_question) && $its_question == "question") {
-	                		$added_file = get_comment_meta($comment_id,'added_file', true);
-	                		if ($added_file != "") {
-	                			echo "<a href='".wp_get_attachment_url($added_file)."'>".esc_html__("Attachment","wpqa")."</a><div class='clearfix'></div><br>";
-	                		}
-	                	}?>
-	                	<div class="wpqa_error"></div>
-	                	<?php if (isset($its_question) && $its_question == "question") {
-	                		if ($active_vote == "on" && $active_vote_answer == "on") {
-	                			if ($owner == false) {?>
-		                			<ul class="question-vote answer-vote<?php echo ($show_dislike_answers != "on"?" answer-vote-dislike":"")?>">
-		                				<li><a href="#"<?php echo ((is_user_logged_in() && $comment->user_id != $user_get_current_user_id) || (!is_user_logged_in() && $active_vote_unlogged == "on")?' id="comment_vote_up-'.$comment_id.'"':'')?> data-type="comment" data-vote-type="up" class="wpqa_vote comment_vote_up<?php echo (is_user_logged_in() && $comment->user_id != $user_get_current_user_id?"":(is_user_logged_in() && $comment->user_id == $user_get_current_user_id?" vote_not_allow":($active_vote_unlogged == "on"?"":" vote_not_user"))).((is_user_logged_in() && $comment->user_id != $user_get_current_user_id) || (!is_user_logged_in() && $active_vote_unlogged == "on")?' vote_allow':'')?>" title="<?php esc_attr_e("Like","wpqa");?>"><i class="<?php echo apply_filters('wpqa_vote_up_icon','icon-up-dir');?>"></i></a></li>
-		                				<li class="vote_result"<?php echo (is_single()?' itemprop="upvoteCount"':'')?>><?php echo ($comment_vote != ""?wpqa_count_number($comment_vote):0)?></li>
-		                				<li class="li_loader"><span class="loader_3 fa-spin"></span></li>
-		                				<?php if ($show_dislike_answers != "on") {?>
-		                					<li class="dislike_answers"><a href="#"<?php echo ((is_user_logged_in() && $comment->user_id != $user_get_current_user_id) || (!is_user_logged_in() && $active_vote_unlogged == "on")?' id="comment_vote_down-'.$comment_id.'"':'')?> data-type="comment" data-vote-type="down" class="wpqa_vote comment_vote_down<?php echo (is_user_logged_in() && $comment->user_id != $user_get_current_user_id?"":(is_user_logged_in() && $comment->user_id == $user_get_current_user_id?" vote_not_allow":($active_vote_unlogged == "on"?"":" vote_not_user"))).((is_user_logged_in() && $comment->user_id != $user_get_current_user_id) || (!is_user_logged_in() && $active_vote_unlogged == "on")?' vote_allow':'')?>" title="<?php esc_attr_e("Dislike","wpqa");?>"><i class="<?php echo apply_filters('wpqa_vote_down_icon','icon-down-dir');?>"></i></a></li>
-		                				<?php }?>
-		                			</ul>
-	                			<?php }
-	                		}
-	                	}?>
-	                	<ul class="comment-reply comment-reply-main">
-	                	    <?php if ($answer != "answer" && $answer != "comment") {
-	                	    	comment_reply_link( array_merge( $args, array( 'reply_text' => '<i class="icon-reply"></i>'.esc_html__( 'Reply', 'wpqa' ),'login_text' => '<i class="icon-lock"></i>'.esc_html__( 'Login to Reply', 'wpqa' ), 'before' => '<li>', 'after' => '</li>', 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) );
-	                	    }
-	                	    do_action("wpqa_action_after_reply_comment",$comment,(isset($its_question) && $its_question == "question"?"answer":"comment"));
-	                	    $comment_share  = wpqa_options("comment_share");
-	                	    $share_facebook = (isset($comment_share["share_facebook"]["value"])?$comment_share["share_facebook"]["value"]:"");
-	                	    $share_twitter  = (isset($comment_share["share_twitter"]["value"])?$comment_share["share_twitter"]["value"]:"");
-	                	    $share_linkedin = (isset($comment_share["share_linkedin"]["value"])?$comment_share["share_linkedin"]["value"]:"");
-	                	    $share_whatsapp = (isset($comment_share["share_whatsapp"]["value"])?$comment_share["share_whatsapp"]["value"]:"");
-	                	    if ($share_facebook == "share_facebook" || $share_twitter == "share_twitter" || $share_linkedin == "share_linkedin" || $share_whatsapp == "share_whatsapp") {?>
-	                	    	<li class="comment-share question-share question-share-2">
-	                	    		<i class="icon-share"></i>
-	                	    		<?php esc_html_e("Share","wpqa");
-	                	    		wpqa_share($comment_share,$share_facebook,$share_twitter,$share_linkedin,$share_whatsapp,"style_2",$comment_id);?>
-	                	    	</li>
-	                	    <?php }
-	                	    if (isset($its_question) && $its_question == "question" && $answer != "answer") {
-	                	    	do_action("wpqa_action_after_share_comment",$comment,(isset($its_question) && $its_question == "question"?"answer":"comment"));
-		                	    $user_best_answer = esc_attr(get_the_author_meta('user_best_answer',$user_get_current_user_id));
-		                	    if ($best_answer_comment == "best_answer_comment" || $the_best_answer == $comment_id) {
-		                	    	if (((is_user_logged_in() && $user_get_current_user_id > 0 && $user_get_current_user_id == $post->post_author && $active_best_answer == "on") || (isset($user_best_answer) && $user_best_answer == "on") || is_super_admin($user_get_current_user_id)) && $the_best_answer != 0){
-		                	        	echo '<li><a class="best_answer_re" data-nonce="'.wp_create_nonce("wpqa_best_answer_nonce").'" title="'.esc_attr__("Cancel the best answer","wpqa").'" href="#"><i class="icon-cancel"></i>'.esc_html__("Cancel the best answer","wpqa").'</a></li>';
-		                	    	}
-		                	    }
-		                	    if (((is_user_logged_in() && $user_get_current_user_id > 0 && $user_get_current_user_id == $post->post_author && $active_best_answer == "on") || (isset($user_best_answer) && $user_best_answer == "on") || is_super_admin($user_get_current_user_id)) && ($the_best_answer == 0 || $the_best_answer == "")){?>
-		                	    	<li><a class="best_answer_a" data-nonce="<?php echo wp_create_nonce("wpqa_best_answer_nonce")?>" title="<?php esc_attr_e("Select as best answer","wpqa");?>" href="#"><i class="icon-check"></i><?php esc_html_e("Select as best answer","wpqa");?></a></li>
-		                	    <?php }
-	                	    }?>
-	                	    <li class="clearfix last-item-answers"></li>
-	                	</ul>
-	                	<?php if ((current_user_can('edit_comment',$comment_id) || ($can_edit_comment == "on" && $comment->user_id == $user_get_current_user_id && $comment->user_id != 0 && $user_get_current_user_id != 0 && ($can_edit_comment_after != "on" || $time_end <= $can_edit_comment_after))) || (($can_delete_comment == "on" && $comment->user_id == $user_get_current_user_id && $comment->user_id > 0 && $user_get_current_user_id > 0) || current_user_can('edit_comment',$comment_id) || is_super_admin($user_get_current_user_id)) || (isset($its_question) && $its_question == "question" && $active_reports == "on" && ((is_user_logged_in() && $comment->user_id != $user_get_current_user_id && $comment->user_id != 0 && $user_get_current_user_id != 0) || (!is_user_logged_in() && $active_logged_reports != "on")))) {?>
-		                	<ul class="comment-reply comment-list-links">
-		                	    <li class="question-list-details comment-list-details">
+						<?php if ($featured_image_in_answers == "on" && wp_get_attachment_image_srcset($featured_image) && $featured_answer_position == "after") {
+							echo "<div class='featured_image_answer featured_image_after'><a href='".$link_url."'>".wpqa_get_aq_resize_img($featured_image_answer_width,$featured_image_answer_height,"",$featured_image)."</a></div>
+							<div class='clearfix'></div>";
+						}
+
+						if (isset($its_question) && $its_question == "question") {
+							$added_file = get_comment_meta($comment_id,'added_file', true);
+							if ($added_file != "") {
+								echo "<a href='".wp_get_attachment_url($added_file)."'>".esc_html__("Attachment","wpqa")."</a><div class='clearfix'></div><br>";
+							}
+						}?>
+						<div class="wpqa_error"></div>
+						<?php if (isset($its_question) && $its_question == "question") {
+							if ($active_vote == "on" && $active_vote_answer == "on") {
+								if ($owner == false) {?>
+									<ul class="question-vote answer-vote<?php echo ($show_dislike_answers != "on"?" answer-vote-dislike":"")?>">
+										<li><a href="#"<?php echo ((is_user_logged_in() && $comment->user_id != $user_get_current_user_id) || (!is_user_logged_in() && $active_vote_unlogged == "on")?' id="comment_vote_up-'.$comment_id.'"':'')?> data-type="comment" data-vote-type="up" class="wpqa_vote comment_vote_up<?php echo (is_user_logged_in() && $comment->user_id != $user_get_current_user_id?"":(is_user_logged_in() && $comment->user_id == $user_get_current_user_id?" vote_not_allow":($active_vote_unlogged == "on"?"":" vote_not_user"))).((is_user_logged_in() && $comment->user_id != $user_get_current_user_id) || (!is_user_logged_in() && $active_vote_unlogged == "on")?' vote_allow':'')?>" title="<?php esc_attr_e("Like","wpqa");?>"><i class="<?php echo apply_filters('wpqa_vote_up_icon','icon-up-dir');?>"></i></a></li>
+										<li class="vote_result"<?php echo (is_single()?' itemprop="upvoteCount"':'')?>><?php echo ($comment_vote != ""?wpqa_count_number($comment_vote):0)?></li>
+										<li class="li_loader"><span class="loader_3 fa-spin"></span></li>
+										<?php if ($show_dislike_answers != "on") {?>
+											<li class="dislike_answers"><a href="#"<?php echo ((is_user_logged_in() && $comment->user_id != $user_get_current_user_id) || (!is_user_logged_in() && $active_vote_unlogged == "on")?' id="comment_vote_down-'.$comment_id.'"':'')?> data-type="comment" data-vote-type="down" class="wpqa_vote comment_vote_down<?php echo (is_user_logged_in() && $comment->user_id != $user_get_current_user_id?"":(is_user_logged_in() && $comment->user_id == $user_get_current_user_id?" vote_not_allow":($active_vote_unlogged == "on"?"":" vote_not_user"))).((is_user_logged_in() && $comment->user_id != $user_get_current_user_id) || (!is_user_logged_in() && $active_vote_unlogged == "on")?' vote_allow':'')?>" title="<?php esc_attr_e("Dislike","wpqa");?>"><i class="<?php echo apply_filters('wpqa_vote_down_icon','icon-down-dir');?>"></i></a></li>
+										<?php }?>
+									</ul>
+								<?php }
+							}
+						}?>
+						<ul class="comment-reply comment-reply-main">
+							<?php if ($answer != "answer" && $answer != "comment") {
+								comment_reply_link( array_merge( $args, array( 'reply_text' => '<i class="icon-reply"></i>'.esc_html__( 'Reply', 'wpqa' ),'login_text' => '<i class="icon-lock"></i>'.esc_html__( 'Login to Reply', 'wpqa' ), 'before' => '<li>', 'after' => '</li>', 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) );
+							}
+							do_action("wpqa_action_after_reply_comment",$comment,(isset($its_question) && $its_question == "question"?"answer":"comment"));
+							$comment_share  = wpqa_options("comment_share");
+							$share_facebook = (isset($comment_share["share_facebook"]["value"])?$comment_share["share_facebook"]["value"]:"");
+							$share_twitter  = (isset($comment_share["share_twitter"]["value"])?$comment_share["share_twitter"]["value"]:"");
+							$share_linkedin = (isset($comment_share["share_linkedin"]["value"])?$comment_share["share_linkedin"]["value"]:"");
+							$share_whatsapp = (isset($comment_share["share_whatsapp"]["value"])?$comment_share["share_whatsapp"]["value"]:"");
+							if ($share_facebook == "share_facebook" || $share_twitter == "share_twitter" || $share_linkedin == "share_linkedin" || $share_whatsapp == "share_whatsapp") {?>
+								<li class="comment-share question-share question-share-2">
+									<i class="icon-share"></i>
+									<?php esc_html_e("Share","wpqa");
+									wpqa_share($comment_share,$share_facebook,$share_twitter,$share_linkedin,$share_whatsapp,"style_2",$comment_id);?>
+								</li>
+							<?php }
+							if (isset($its_question) && $its_question == "question" && $answer != "answer") {
+								do_action("wpqa_action_after_share_comment",$comment,(isset($its_question) && $its_question == "question"?"answer":"comment"));
+								$user_best_answer = esc_attr(get_the_author_meta('user_best_answer',$user_get_current_user_id));
+								if ($best_answer_comment == "best_answer_comment" || $the_best_answer == $comment_id) {
+									if (((is_user_logged_in() && $user_get_current_user_id > 0 && $user_get_current_user_id == $post->post_author && $active_best_answer == "on") || (isset($user_best_answer) && $user_best_answer == "on") || is_super_admin($user_get_current_user_id)) && $the_best_answer != 0){
+										echo '<li><a class="best_answer_re" data-nonce="'.wp_create_nonce("wpqa_best_answer_nonce").'" title="'.esc_attr__("Cancel the best answer","wpqa").'" href="#"><i class="icon-cancel"></i>'.esc_html__("Cancel the best answer","wpqa").'</a></li>';
+									}
+								}
+								if (((is_user_logged_in() && $user_get_current_user_id > 0 && $user_get_current_user_id == $post->post_author && $active_best_answer == "on") || (isset($user_best_answer) && $user_best_answer == "on") || is_super_admin($user_get_current_user_id)) && ($the_best_answer == 0 || $the_best_answer == "")){?>
+									<li><a class="best_answer_a" data-nonce="<?php echo wp_create_nonce("wpqa_best_answer_nonce")?>" title="<?php esc_attr_e("Select as best answer","wpqa");?>" href="#"><i class="icon-check"></i><?php esc_html_e("Select as best answer","wpqa");?></a></li>
+								<?php }
+							}?>
+							<li class="clearfix last-item-answers"></li>
+						</ul>
+						<?php if ((current_user_can('edit_comment',$comment_id) || ($can_edit_comment == "on" && $comment->user_id == $user_get_current_user_id && $comment->user_id != 0 && $user_get_current_user_id != 0 && ($can_edit_comment_after != "on" || $time_end <= $can_edit_comment_after))) || (($can_delete_comment == "on" && $comment->user_id == $user_get_current_user_id && $comment->user_id > 0 && $user_get_current_user_id > 0) || current_user_can('edit_comment',$comment_id) || is_super_admin($user_get_current_user_id)) || (isset($its_question) && $its_question == "question" && $active_reports == "on" && ((is_user_logged_in() && $comment->user_id != $user_get_current_user_id && $comment->user_id != 0 && $user_get_current_user_id != 0) || (!is_user_logged_in() && $active_logged_reports != "on")))) {?>
+							<ul class="comment-reply comment-list-links">
+								<li class="question-list-details comment-list-details">
 									<i class="icon-dot-3"></i>
 									<ul>
-				                	    <?php if (current_user_can('edit_comment',$comment_id) || ($can_edit_comment == "on" && $comment->user_id == $user_get_current_user_id && $comment->user_id != 0 && $user_get_current_user_id != 0 && ($can_edit_comment_after != "on" || $time_end <= $can_edit_comment_after))) {
-				                	    	echo "<li><a class='comment-edit-link edit-comment' href='".esc_url(wpqa_edit_permalink($comment_id,"comment"))."'><i class='icon-pencil'></i>".esc_html__("Edit","wpqa")."</a></li>";
-				                	    }
-				                	    if (($can_delete_comment == "on" && $comment->user_id == $user_get_current_user_id && $comment->user_id > 0 && $user_get_current_user_id > 0) || current_user_can('edit_comment',$comment_id) || is_super_admin($user_get_current_user_id)) {
-				                	    	echo "<li><a class='delete-comment".(isset($its_question) && $its_question == "question"?' delete-answer':'')."' href='".esc_url_raw(add_query_arg(array('delete_comment' => $comment_id,"wpqa_delete_nonce" => wp_create_nonce("wpqa_delete_nonce")),get_permalink($comment->comment_post_ID)))."'><i class='icon-trash'></i>".esc_html__("Delete","wpqa")."</a></li>";
-				                	    }
-			                	    	if (isset($its_question) && $its_question == "question" && $active_reports == "on" && ((is_user_logged_in() && $comment->user_id != $user_get_current_user_id && $comment->user_id != 0 && $user_get_current_user_id != 0) || (!is_user_logged_in() && $active_logged_reports != "on"))) {
-			                	    		if ($owner == false) {?>
-				                	    		<li class="report_activated"><a class="report_c" href="<?php echo esc_attr($comment_id)?>"><i class="icon-attention"></i><?php esc_html_e("Report","wpqa")?></a></li>
-				                	    	<?php }
-				                	    }?>
-				               		</ul>
-				               	</li>
-		                	    <li class="clearfix last-item-answers"></li>
-		                	</ul>
-		                <?php }
-		                do_action("wpqa_action_after_list_comment",$comment,(isset($its_question) && $its_question == "question"?"answer":"comment"));?>
-	                </div><!-- End text -->
-	                <div class="clearfix"></div>
-	            </div><!-- End comment-text -->
-	        </div><!-- End comment-body -->
-	<?php }
-endif;
-/* Breadcrumbs */
-if (!function_exists('wpqa_breadcrumbs')) :
-	function wpqa_breadcrumbs ($text = "",$breadcrumb_right = true) {
-		global $post,$wp_query;
-		$active_points = wpqa_options("active_points");
-		$breadcrumbs_separator = wpqa_options("breadcrumbs_separator");
-		$breadcrumbs_separator = ($breadcrumbs_separator != ""?$breadcrumbs_separator:"/");
-		$post_type = get_post_type();
-		
-	    $home       = '<i class="icon-home"></i>'.esc_html__('Home',"wpqa");
-	    $before     = '<span class="crumbs-span"> '.$breadcrumbs_separator.' </span><span class="current">';
-	    $after      = '</span>';
-	    $homeLink   = esc_url(home_url('/'));
-	    
-		echo '<div class="breadcrumbs"><span class="crumbs" xmlns:v="https://rdf.data-vocabulary.org/#"><span typeof="v:Breadcrumb">
-	    <a rel="v:url" property="v:title" href="' . esc_url(home_url('/')) . '">' . $home . '</a><span rel="v:child" typeof="v:Breadcrumb">';
-	    if (isset($text) && $text != "") {
-	    	echo ($before . $text . $after);
-	    }else if (wpqa_is_user_profile()) {
-	    	$wpqa_user_id = (int)get_query_var(apply_filters('wpqa_user_id','wpqa_user_id'));
-    		$user_name = get_the_author_meta("display_name",$wpqa_user_id);
-    		echo ($before . (wpqa_is_home_profile()?$user_name:"<a href='".wpqa_profile_url($wpqa_user_id)."'>" . $user_name . "</a>") . $after);
-    		if (wpqa_user_title()) {
-    			echo ($before.wpqa_profile_title().$after);
-    		}
-	    }else if (is_search() || wpqa_is_search()) {
-	    	$search_value = wpqa_search();
-	    	if ($search_value != "") {
-	    		$out_data = esc_html__('Search results for ', "wpqa") . '"' . $search_value . '"';
-	    	}else {
-	    		$out_data = esc_html__('Search', "wpqa");
-	    	}
-	    	echo ($before . $out_data . $after);
-	    }else if (wpqa_is_buy_points()) {
-	    	echo ($before . esc_html__('Buy points', "wpqa") . $after);
-	    }else if (wpqa_is_login()) {
-	    	echo ($before . esc_html__('Login', "wpqa") . $after);
-	    }else if (wpqa_is_signup()) {
-	    	echo ($before . esc_html__('Signup', "wpqa") . $after);
-	    }else if (wpqa_is_lost_password()) {
-	    	echo ($before . esc_html__('Lost password', "wpqa") . $after);
-	    }else if (wpqa_is_add_questions()) {
-	    	$wpqa_add_question_user = wpqa_add_question_user();
-	    	if ($wpqa_add_question_user > 0) {
-	    		$display_name = get_the_author_meta('display_name',$wpqa_add_question_user);
-	    	}
-	    	echo ($before . esc_html__('Ask question', "wpqa") . ($wpqa_add_question_user > 0?" ".esc_html__("to","wpqa")." ".$display_name:"") . $after);
-	    }else if (wpqa_is_edit_questions()) {
-	    	echo ($before . esc_html__('Edit question', "wpqa") . $after);
-	    }else if (wpqa_is_add_posts()) {
-	    	echo ($before . esc_html__('Add post', "wpqa") . $after);
-	    }else if (wpqa_is_edit_posts()) {
-	    	echo ($before . esc_html__('Edit post', "wpqa") . $after);
-	    }else if (wpqa_is_edit_comments()) {
-	    	echo ($before . esc_html__('Edit comment', "wpqa") . $after);
-	    }else if (wpqa_is_edit_tags()) {
-	    	echo ($before . esc_html__('Edit tags', "wpqa") . $after);
-	    }else if (is_category() || is_tag() || is_tax()) {
-	        $term = $wp_query->get_queried_object();
-	    	$taxonomy = get_taxonomy( $term->taxonomy );
-	    	if ( isset($item) && is_array($item) && ( is_taxonomy_hierarchical( $term->taxonomy ) && $term->parent ) && $parents = wpqa_breadcrumbs_get_term_parents( $term->parent, $term->taxonomy ) )
-	    		$item = array_merge( $item, $parents );
-	    	$item['last'] = $term->name;
-	    	if (isset($term->term_id)) {
-	    		echo wpqa_get_taxonomy_parents($term->term_id,$taxonomy->name,true,$term->term_id,array(),$before,$after);
-	    	}
-	        echo ($before . '' . single_cat_title('', false) . '' . $after);
-	    }else if (is_day()) {
-	        echo ($before .'<a rel="v:url" property="v:title" href="' . esc_url(get_year_link(get_the_time('Y'))) . '">' . get_the_time('Y') . '</a>' . ''.$after).
-	        ($before .'<a rel="v:url" property="v:title" href="' . esc_url(get_month_link(get_the_time('Y'),get_the_time('m'))) . '">' . get_the_time('F') . '</a>' . ''.$after).
-	        ($before . get_the_time('d') . $after);
-	    }else if (is_month()) {
-	        echo ($before .'<a rel="v:url" property="v:title" href="' . esc_url(get_year_link(get_the_time('Y'))) . '">' . get_the_time('Y') . '</a>' . ''.$after).
-	        ($before . get_the_time('F') . $after);
-	    }else if (is_year()) {
-	        echo ($before . get_the_time('Y') . $after);
-	    }else if (is_single() && !is_attachment()) {
-	        if ($post_type != 'post') {
-	        	if ($post_type == 'question') {
-	    			echo ($before . "<a href='".get_post_type_archive_link("question")."'>" . esc_html__("Questions","wpqa") . "</a>" . $after).
-	    			($before . esc_html__("Q","wpqa")." ". $post->ID . $after);
-	        	}else {
-	        		$post_type = get_post_type_object($post_type);
-	        		$slug = $post_type->rewrite;
-	        		echo ($before .'<a href="' . esc_url($homeLink . '/' . $slug['slug']) . '/">' . $post_type->labels->singular_name . '</a>' . ''.$after).
-	        		($before . get_the_title() . $after);
-	        	}
-	        }else {
-	            $cat = get_the_category();
-	            if (isset($cat) && is_array($cat) && isset($cat[0])) {
-	            	$cat = $cat[0];
-	            	echo ($before .get_category_parents($cat, TRUE, ' '.$before.$after.' '));
-	            }else {
-	            	echo ($before.$after);
-	            }
-	            echo (get_the_title());
-	        }
-	    }else if (!is_single() && !is_page() && $post_type != 'post') {
-	        $post_type = get_post_type_object($post_type);
-	    	echo ($before . (isset($post_type->labels->singular_name) && !is_404()?$post_type->labels->singular_name:esc_html__("Error 404","wpqa")) . $after);
-	    }else if (is_attachment()) {
-	        $parent = get_post($post->post_parent);
-	        $cat = get_the_category($parent->ID);
-	        echo ($before . get_the_title() . $after);
-	    }else if (is_page() && !$post->post_parent) {
-	        echo ($before . get_the_title() . $after);
-	    }else if (is_page() && $post->post_parent) {
-	        $parent_id  = $post->post_parent;
-	        $breadcrumbs = array();
-	        while ($parent_id) {
-	            $page = get_page($parent_id);
-	            $breadcrumbs[] = '<a rel="v:url" property="v:title" href="' . esc_url(get_permalink($page->ID)) . '">' . get_the_title($page->ID) . '</a>';
-	            $parent_id  = $page->post_parent;
-	        }
-	        $breadcrumbs = array_reverse($breadcrumbs);
-	        foreach ($breadcrumbs as $crumb) echo ($before.$crumb.$after);
-	        echo ($before . get_the_title() . $after);
-	    }else if (is_tag()) {
-	        echo ($before . esc_html__('Posts tagged ', "wpqa") . '"' . single_tag_title('', false) . '"' . $after);
-	    }else if (is_404()) {
-	        echo ($before . esc_html__('Error 404 ', "wpqa") . $after);
-	    }
-	    do_action("wpqa_filter_breadcrumb",$before,$after);
-	    if (get_query_var('paged')) {
-	        echo ($before . esc_html__('Page', "wpqa") . ' ' . esc_attr(get_query_var('paged')) . $after);
-	    }
-		echo '</span></span></span>';
-		if ($breadcrumb_right == true) {
-			$live_search = wpqa_options('live_search');
-			$category_filter = wpqa_options('category_filter');
-			echo '<div class="breadcrumb-right">';
+										<?php if (current_user_can('edit_comment',$comment_id) || ($can_edit_comment == "on" && $comment->user_id == $user_get_current_user_id && $comment->user_id != 0 && $user_get_current_user_id != 0 && ($can_edit_comment_after != "on" || $time_end <= $can_edit_comment_after))) {
+											echo "<li><a class='comment-edit-link edit-comment' href='".esc_url(wpqa_edit_permalink($comment_id,"comment"))."'><i class='icon-pencil'></i>".esc_html__("Edit","wpqa")."</a></li>";
+										}
+										if (($can_delete_comment == "on" && $comment->user_id == $user_get_current_user_id && $comment->user_id > 0 && $user_get_current_user_id > 0) || current_user_can('edit_comment',$comment_id) || is_super_admin($user_get_current_user_id)) {
+											echo "<li><a class='delete-comment".(isset($its_question) && $its_question == "question"?' delete-answer':'')."' href='".esc_url_raw(add_query_arg(array('delete_comment' => $comment_id,"wpqa_delete_nonce" => wp_create_nonce("wpqa_delete_nonce")),get_permalink($comment->comment_post_ID)))."'><i class='icon-trash'></i>".esc_html__("Delete","wpqa")."</a></li>";
+										}
+										if (isset($its_question) && $its_question == "question" && $active_reports == "on" && ((is_user_logged_in() && $comment->user_id != $user_get_current_user_id && $comment->user_id != 0 && $user_get_current_user_id != 0) || (!is_user_logged_in() && $active_logged_reports != "on"))) {
+											if ($owner == false) {?>
+												<li class="report_activated"><a class="report_c" href="<?php echo esc_attr($comment_id)?>"><i class="icon-attention"></i><?php esc_html_e("Report","wpqa")?></a></li>
+											<?php }
+										}?>
+									</ul>
+								</li>
+								<li class="clearfix last-item-answers"></li>
+							</ul>
+						<?php }
+						do_action("wpqa_action_after_list_comment",$comment,(isset($its_question) && $its_question == "question"?"answer":"comment"));?>
+					</div><!-- End text -->
+					<div class="clearfix"></div>
+				</div><!-- End comment-text -->
+			</div><!-- End comment-body -->
+		<?php }
+	endif;
+	/* Breadcrumbs */
+	if (!function_exists('wpqa_breadcrumbs')) :
+		function wpqa_breadcrumbs ($text = "",$breadcrumb_right = true) {
+			global $post,$wp_query;
+			$active_points = wpqa_options("active_points");
+			$breadcrumbs_separator = wpqa_options("breadcrumbs_separator");
+			$breadcrumbs_separator = ($breadcrumbs_separator != ""?$breadcrumbs_separator:"/");
+			$post_type = get_post_type();
+
+			$home       = '<i class="icon-home"></i>'.esc_html__('Home',"wpqa");
+			$before     = '<span class="crumbs-span"> '.$breadcrumbs_separator.' </span><span class="current">';
+			$after      = '</span>';
+			$homeLink   = esc_url(home_url('/'));
+
+			echo '<div class="breadcrumbs"><span class="crumbs" xmlns:v="https://rdf.data-vocabulary.org/#"><span typeof="v:Breadcrumb">
+			<a rel="v:url" property="v:title" href="' . esc_url(home_url('/')) . '">' . $home . '</a><span rel="v:child" typeof="v:Breadcrumb">';
+			if (isset($text) && $text != "") {
+				echo ($before . $text . $after);
+			}else if (wpqa_is_user_profile()) {
+				$wpqa_user_id = (int)get_query_var(apply_filters('wpqa_user_id','wpqa_user_id'));
+				$user_name = get_the_author_meta("display_name",$wpqa_user_id);
+				echo ($before . (wpqa_is_home_profile()?$user_name:"<a href='".wpqa_profile_url($wpqa_user_id)."'>" . $user_name . "</a>") . $after);
+				if (wpqa_user_title()) {
+					echo ($before.wpqa_profile_title().$after);
+				}
+			}else if (is_search() || wpqa_is_search()) {
+				$search_value = wpqa_search();
+				if ($search_value != "") {
+					$out_data = esc_html__('Search results for ', "wpqa") . '"' . $search_value . '"';
+				}else {
+					$out_data = esc_html__('Search', "wpqa");
+				}
+				echo ($before . $out_data . $after);
+			}else if (wpqa_is_buy_points()) {
+				echo ($before . esc_html__('Buy points', "wpqa") . $after);
+			}else if (wpqa_is_login()) {
+				echo ($before . esc_html__('Login', "wpqa") . $after);
+			}else if (wpqa_is_signup()) {
+				echo ($before . esc_html__('Signup', "wpqa") . $after);
+			}else if (wpqa_is_lost_password()) {
+				echo ($before . esc_html__('Lost password', "wpqa") . $after);
+			}else if (wpqa_is_add_questions()) {
+				$wpqa_add_question_user = wpqa_add_question_user();
+				if ($wpqa_add_question_user > 0) {
+					$display_name = get_the_author_meta('display_name',$wpqa_add_question_user);
+				}
+				echo ($before . esc_html__('Ask question', "wpqa") . ($wpqa_add_question_user > 0?" ".esc_html__("to","wpqa")." ".$display_name:"") . $after);
+			}else if (wpqa_is_edit_questions()) {
+				echo ($before . esc_html__('Edit question', "wpqa") . $after);
+			}else if (wpqa_is_add_posts()) {
+				echo ($before . esc_html__('Add post', "wpqa") . $after);
+			}else if (wpqa_is_edit_posts()) {
+				echo ($before . esc_html__('Edit post', "wpqa") . $after);
+			}else if (wpqa_is_edit_comments()) {
+				echo ($before . esc_html__('Edit comment', "wpqa") . $after);
+			}else if (wpqa_is_edit_tags()) {
+				echo ($before . esc_html__('Edit tags', "wpqa") . $after);
+			}else if (is_category() || is_tag() || is_tax()) {
+				$term = $wp_query->get_queried_object();
+				$taxonomy = get_taxonomy( $term->taxonomy );
+				if ( isset($item) && is_array($item) && ( is_taxonomy_hierarchical( $term->taxonomy ) && $term->parent ) && $parents = wpqa_breadcrumbs_get_term_parents( $term->parent, $term->taxonomy ) )
+					$item = array_merge( $item, $parents );
+				$item['last'] = $term->name;
+				if (isset($term->term_id)) {
+					echo wpqa_get_taxonomy_parents($term->term_id,$taxonomy->name,true,$term->term_id,array(),$before,$after);
+				}
+				echo ($before . '' . single_cat_title('', false) . '' . $after);
+			}else if (is_day()) {
+				echo ($before .'<a rel="v:url" property="v:title" href="' . esc_url(get_year_link(get_the_time('Y'))) . '">' . get_the_time('Y') . '</a>' . ''.$after).
+				($before .'<a rel="v:url" property="v:title" href="' . esc_url(get_month_link(get_the_time('Y'),get_the_time('m'))) . '">' . get_the_time('F') . '</a>' . ''.$after).
+				($before . get_the_time('d') . $after);
+			}else if (is_month()) {
+				echo ($before .'<a rel="v:url" property="v:title" href="' . esc_url(get_year_link(get_the_time('Y'))) . '">' . get_the_time('Y') . '</a>' . ''.$after).
+				($before . get_the_time('F') . $after);
+			}else if (is_year()) {
+				echo ($before . get_the_time('Y') . $after);
+			}else if (is_single() && !is_attachment()) {
+				if ($post_type != 'post') {
+					if ($post_type == 'question') {
+						echo ($before . "<a href='".get_post_type_archive_link("question")."'>" . esc_html__("Questions","wpqa") . "</a>" . $after).
+						($before . esc_html__("Q","wpqa")." ". $post->ID . $after);
+					}else {
+						$post_type = get_post_type_object($post_type);
+						$slug = $post_type->rewrite;
+						echo ($before .'<a href="' . esc_url($homeLink . '/' . $slug['slug']) . '/">' . $post_type->labels->singular_name . '</a>' . ''.$after).
+						($before . get_the_title() . $after);
+					}
+				}else {
+					$cat = get_the_category();
+					if (isset($cat) && is_array($cat) && isset($cat[0])) {
+						$cat = $cat[0];
+						echo ($before .get_category_parents($cat, TRUE, ' '.$before.$after.' '));
+					}else {
+						echo ($before.$after);
+					}
+					echo (get_the_title());
+				}
+			}else if (!is_single() && !is_page() && $post_type != 'post') {
+				$post_type = get_post_type_object($post_type);
+				echo ($before . (isset($post_type->labels->singular_name) && !is_404()?$post_type->labels->singular_name:esc_html__("Error 404","wpqa")) . $after);
+			}else if (is_attachment()) {
+				$parent = get_post($post->post_parent);
+				$cat = get_the_category($parent->ID);
+				echo ($before . get_the_title() . $after);
+			}else if (is_page() && !$post->post_parent) {
+				echo ($before . get_the_title() . $after);
+			}else if (is_page() && $post->post_parent) {
+				$parent_id  = $post->post_parent;
+				$breadcrumbs = array();
+				while ($parent_id) {
+					$page = get_page($parent_id);
+					$breadcrumbs[] = '<a rel="v:url" property="v:title" href="' . esc_url(get_permalink($page->ID)) . '">' . get_the_title($page->ID) . '</a>';
+					$parent_id  = $page->post_parent;
+				}
+				$breadcrumbs = array_reverse($breadcrumbs);
+				foreach ($breadcrumbs as $crumb) echo ($before.$crumb.$after);
+				echo ($before . get_the_title() . $after);
+			}else if (is_tag()) {
+				echo ($before . esc_html__('Posts tagged ', "wpqa") . '"' . single_tag_title('', false) . '"' . $after);
+			}else if (is_404()) {
+				echo ($before . esc_html__('Error 404 ', "wpqa") . $after);
+			}
+			do_action("wpqa_filter_breadcrumb",$before,$after);
+			if (get_query_var('paged')) {
+				echo ($before . esc_html__('Page', "wpqa") . ' ' . esc_attr(get_query_var('paged')) . $after);
+			}
+			echo '</span></span></span>';
+			if ($breadcrumb_right == true) {
+				$live_search = wpqa_options('live_search');
+				$category_filter = wpqa_options('category_filter');
+				echo '<div class="breadcrumb-right">';
 				if (wpqa_is_user_profile()) {
 					if (wpqa_is_user_owner()) {
 						if (wpqa_is_user_edit_profile()) {
 							echo '<div class="profile-setting">
-								<a href="#edit-profile" data-type="setting"'.(isset($_POST["profile_type"]) && $_POST["profile_type"] == "setting"?" class='active-tab'":(empty($_POST["profile_type"])?" class='active-tab'":"")).'>'.esc_html__("Edit profile","wpqa").'</a>
-								<a href="#change-password" data-type="password"'.(isset($_POST["profile_type"]) && $_POST["profile_type"] == "password"?" class='active-tab'":"").'>'.esc_html__("Change Password","wpqa").'</a>
+							<a href="#edit-profile" data-type="setting"'.(isset($_POST["profile_type"]) && $_POST["profile_type"] == "setting"?" class='active-tab'":(empty($_POST["profile_type"])?" class='active-tab'":"")).'>'.esc_html__("Edit profile","wpqa").'</a>
+							<a href="#change-password" data-type="password"'.(isset($_POST["profile_type"]) && $_POST["profile_type"] == "password"?" class='active-tab'":"").'>'.esc_html__("Change Password","wpqa").'</a>
 							</div><div class="clearfix"></div>';
 						}else {?>
 							<div class="question-navigation edit-profile"><a href="<?php echo esc_url(wpqa_get_profile_permalink(get_current_user_id(),"edit"))?>"><i class="icon-pencil"></i><?php esc_html_e("Edit profile","wpqa")?></a></div>
@@ -2940,17 +2942,17 @@ if (!function_exists('wpqa_breadcrumbs')) :
 						$cats_search = "question-category";
 					}
 					$args = array(
-					'child_of'     => 0,
-					'parent'       => '',
-					'orderby'      => 'name',
-					'order'        => 'ASC',
-					'hide_empty'   => 1,
-					'hierarchical' => 1,
-					'exclude'      => '',
-					'include'      => '',
-					'number'       => '',
-					'taxonomy'     => $cats_search,
-					'pad_counts'   => false );
+						'child_of'     => 0,
+						'parent'       => '',
+						'orderby'      => 'name',
+						'order'        => 'ASC',
+						'hide_empty'   => 1,
+						'hierarchical' => 1,
+						'exclude'      => '',
+						'include'      => '',
+						'number'       => '',
+						'taxonomy'     => $cats_search,
+						'pad_counts'   => false );
 					$options_categories = get_categories($args);
 					if (isset($options_categories) && is_array($options_categories)) {?>
 						<div class="search-form">
@@ -2971,32 +2973,32 @@ if (!function_exists('wpqa_breadcrumbs')) :
 					$cat_filter = get_post_meta($post->ID,prefix_meta.'cat_filter',true);
 					if ($cat_search == "on" || $cat_filter == "on") {
 						echo '<div class="search-form">';
-							if ($cat_filter == "on") {
-								$cat_sort = get_post_meta($post->ID,prefix_meta.'cat_sort',true);
-								$cat_sort = ($cat_sort != ""?$cat_sort:"name");
-								$g_cat_filter = (isset($_GET["cat_filter"]) && $_GET["cat_filter"] != ""?esc_html($_GET["cat_filter"]):$cat_sort);
-								echo '<form method="get" class="search-filter-form">
-									<span class="styled-select cat-filter">
-										<select name="cat_filter" onchange="this.form.submit()">
-											<option value="count" '.selected($g_cat_filter,"count",false).'>'.esc_html__('Popular','wpqa').'</option>
-											<option value="name" '.selected($g_cat_filter,"name",false).'>'.esc_html__('Name','wpqa').'</option>
-										</select>
-									</span>
-								</form>';
+						if ($cat_filter == "on") {
+							$cat_sort = get_post_meta($post->ID,prefix_meta.'cat_sort',true);
+							$cat_sort = ($cat_sort != ""?$cat_sort:"name");
+							$g_cat_filter = (isset($_GET["cat_filter"]) && $_GET["cat_filter"] != ""?esc_html($_GET["cat_filter"]):$cat_sort);
+							echo '<form method="get" class="search-filter-form">
+							<span class="styled-select cat-filter">
+							<select name="cat_filter" onchange="this.form.submit()">
+							<option value="count" '.selected($g_cat_filter,"count",false).'>'.esc_html__('Popular','wpqa').'</option>
+							<option value="name" '.selected($g_cat_filter,"name",false).'>'.esc_html__('Name','wpqa').'</option>
+							</select>
+							</span>
+							</form>';
+						}
+						if ($cat_search == "on") {
+							$cats_tax = get_post_meta($post->ID,prefix_meta.'cats_tax',true);
+							$cats_tax = ($cats_tax != ""?$cats_tax:"question");
+							echo '<form method="get" action="'.esc_url(wpqa_get_search_permalink()).'" class="search-input-form main-search-form">
+							<input class="search-input'.($live_search == "on"?" live-search live-search-icon":"").'"'.($live_search == "on"?" autocomplete='off'":"").' type="search" name="search" placeholder="'.esc_attr__('Type to find...','wpqa').'">';
+							if ($live_search == "on") {
+								echo '<div class="loader_2 search_loader"></div>
+								<div class="search-results results-empty"></div>';
 							}
-							if ($cat_search == "on") {
-								$cats_tax = get_post_meta($post->ID,prefix_meta.'cats_tax',true);
-								$cats_tax = ($cats_tax != ""?$cats_tax:"question");
-								echo '<form method="get" action="'.esc_url(wpqa_get_search_permalink()).'" class="search-input-form main-search-form">
-									<input class="search-input'.($live_search == "on"?" live-search live-search-icon":"").'"'.($live_search == "on"?" autocomplete='off'":"").' type="search" name="search" placeholder="'.esc_attr__('Type to find...','wpqa').'">';
-									if ($live_search == "on") {
-										echo '<div class="loader_2 search_loader"></div>
-										<div class="search-results results-empty"></div>';
-									}
-									echo '<button class="button-search"><i class="icon-search"></i></button>
-									<input type="hidden" name="search_type" class="search_type" value="'.($cats_tax == "post"?"category":"question-category").'">
-								</form>';
-							}
+							echo '<button class="button-search"><i class="icon-search"></i></button>
+							<input type="hidden" name="search_type" class="search_type" value="'.($cats_tax == "post"?"category":"question-category").'">
+							</form>';
+						}
 						echo '</div>';
 					}
 				}else if (is_page_template("template-tags.php")) {
@@ -3004,32 +3006,32 @@ if (!function_exists('wpqa_breadcrumbs')) :
 					$tag_filter = get_post_meta($post->ID,prefix_meta.'tag_filter',true);
 					if ($tag_search == "on" || $tag_filter == "on") {
 						echo '<div class="search-form">';
-							if ($tag_filter == "on") {
-								$tag_sort = get_post_meta($post->ID,prefix_meta.'tag_sort',true);
-								$tag_sort = ($tag_sort != ""?$tag_sort:"name");
-								$g_tag_filter = (isset($_GET["tag_filter"]) && $_GET["tag_filter"] != ""?esc_html($_GET["tag_filter"]):$tag_sort);
-								echo '<form method="get" class="search-filter-form">
-									<span class="styled-select tag-filter">
-										<select name="tag_filter" onchange="this.form.submit()">
-											<option value="count" '.selected($g_tag_filter,"count",false).'>'.esc_html__('Popular','wpqa').'</option>
-											<option value="name" '.selected($g_tag_filter,"name",false).'>'.esc_html__('Name','wpqa').'</option>
-										</select>
-									</span>
-								</form>';
+						if ($tag_filter == "on") {
+							$tag_sort = get_post_meta($post->ID,prefix_meta.'tag_sort',true);
+							$tag_sort = ($tag_sort != ""?$tag_sort:"name");
+							$g_tag_filter = (isset($_GET["tag_filter"]) && $_GET["tag_filter"] != ""?esc_html($_GET["tag_filter"]):$tag_sort);
+							echo '<form method="get" class="search-filter-form">
+							<span class="styled-select tag-filter">
+							<select name="tag_filter" onchange="this.form.submit()">
+							<option value="count" '.selected($g_tag_filter,"count",false).'>'.esc_html__('Popular','wpqa').'</option>
+							<option value="name" '.selected($g_tag_filter,"name",false).'>'.esc_html__('Name','wpqa').'</option>
+							</select>
+							</span>
+							</form>';
+						}
+						if ($tag_search == "on") {
+							$tags_tax = get_post_meta($post->ID,prefix_meta.'tags_tax',true);
+							$tags_tax = ($tags_tax != ""?$tags_tax:"question");
+							echo '<form method="get" action="'.esc_url(wpqa_get_search_permalink()).'" class="search-input-form main-search-form">
+							<input class="search-input'.($live_search == "on"?" live-search live-search-icon":"").'"'.($live_search == "on"?" autocomplete='off'":"").' type="search" name="search" placeholder="'.esc_attr__('Type to find...','wpqa').'">';
+							if ($live_search == "on") {
+								echo '<div class="loader_2 search_loader"></div>
+								<div class="search-results results-empty"></div>';
 							}
-							if ($tag_search == "on") {
-								$tags_tax = get_post_meta($post->ID,prefix_meta.'tags_tax',true);
-								$tags_tax = ($tags_tax != ""?$tags_tax:"question");
-								echo '<form method="get" action="'.esc_url(wpqa_get_search_permalink()).'" class="search-input-form main-search-form">
-									<input class="search-input'.($live_search == "on"?" live-search live-search-icon":"").'"'.($live_search == "on"?" autocomplete='off'":"").' type="search" name="search" placeholder="'.esc_attr__('Type to find...','wpqa').'">';
-									if ($live_search == "on") {
-										echo '<div class="loader_2 search_loader"></div>
-										<div class="search-results results-empty"></div>';
-									}
-									echo '<button class="button-search"><i class="icon-search"></i></button>
-									<input type="hidden" name="search_type" class="search_type" value="'.($tags_tax == "post"?"post_tag":"question_tags").'">
-								</form>';
-							}
+							echo '<button class="button-search"><i class="icon-search"></i></button>
+							<input type="hidden" name="search_type" class="search_type" value="'.($tags_tax == "post"?"post_tag":"question_tags").'">
+							</form>';
+						}
 						echo '</div>';
 					}
 				}else if (is_page_template("template-users.php")) {
@@ -3037,39 +3039,39 @@ if (!function_exists('wpqa_breadcrumbs')) :
 					$user_filter = get_post_meta($post->ID,prefix_meta.'user_filter',true);
 					if ($user_search == "on" || $user_filter == "on") {
 						echo '<div class="search-form">';
-							if ($user_filter == "on") {
-								$user_sort = get_post_meta($post->ID,prefix_meta.'user_sort',true);
-								$user_sort = ($user_sort != ""?$user_sort:"user_registered");
-								$g_user_filter = (isset($_GET["user_filter"]) && $_GET["user_filter"] != ""?esc_html($_GET["user_filter"]):$user_sort);
-								echo '<form method="get" class="search-filter-form">
-									<span class="styled-select user-filter">
-										<select name="user_filter" onchange="this.form.submit()">
-											<option value="user_registered" '.selected($g_user_filter,"user_registered",false).'>'.esc_html__('Date Register','wpqa').'</option>
-											<option value="display_name" '.selected($g_user_filter,"display_name",false).'>'.esc_html__('Name','wpqa').'</option>
-											<option value="ID" '.selected($g_user_filter,"ID",false).'>'.esc_html__('ID','wpqa').'</option>
-											<option value="question_count" '.selected($g_user_filter,"question_count",false).'>'.esc_html__('Questions','wpqa').'</option>
-											<option value="answers" '.selected($g_user_filter,"answers",false).'>'.esc_html__('Answers','wpqa').'</option>
-											<option value="the_best_answer" '.selected($g_user_filter,"the_best_answer",false).'>'.esc_html__('Best Answers','wpqa').'</option>';
-											if ($active_points == "on") {
-												echo '<option value="points" '.selected($g_user_filter,"points",false).'>'.esc_html__('Points','wpqa').'</option>';
-											}
-											echo '<option value="post_count" '.selected($g_user_filter,"post_count",false).'>'.esc_html__('Posts','wpqa').'</option>
-											<option value="comments" '.selected($g_user_filter,"comments",false).'>'.esc_html__('Comments','wpqa').'</option>
-										</select>
-									</span>
-								</form>';
+						if ($user_filter == "on") {
+							$user_sort = get_post_meta($post->ID,prefix_meta.'user_sort',true);
+							$user_sort = ($user_sort != ""?$user_sort:"user_registered");
+							$g_user_filter = (isset($_GET["user_filter"]) && $_GET["user_filter"] != ""?esc_html($_GET["user_filter"]):$user_sort);
+							echo '<form method="get" class="search-filter-form">
+							<span class="styled-select user-filter">
+							<select name="user_filter" onchange="this.form.submit()">
+							<option value="user_registered" '.selected($g_user_filter,"user_registered",false).'>'.esc_html__('Date Register','wpqa').'</option>
+							<option value="display_name" '.selected($g_user_filter,"display_name",false).'>'.esc_html__('Name','wpqa').'</option>
+							<option value="ID" '.selected($g_user_filter,"ID",false).'>'.esc_html__('ID','wpqa').'</option>
+							<option value="question_count" '.selected($g_user_filter,"question_count",false).'>'.esc_html__('Questions','wpqa').'</option>
+							<option value="answers" '.selected($g_user_filter,"answers",false).'>'.esc_html__('Answers','wpqa').'</option>
+							<option value="the_best_answer" '.selected($g_user_filter,"the_best_answer",false).'>'.esc_html__('Best Answers','wpqa').'</option>';
+							if ($active_points == "on") {
+								echo '<option value="points" '.selected($g_user_filter,"points",false).'>'.esc_html__('Points','wpqa').'</option>';
 							}
-							if ($user_search == "on") {
-								echo '<form method="get" action="'.esc_url(wpqa_get_search_permalink()).'" class="search-input-form main-search-form">
-									<input class="search-input'.($live_search == "on"?" live-search live-search-icon":"").'"'.($live_search == "on"?" autocomplete='off'":"").' type="search" name="search" placeholder="'.esc_attr__('Type to find...','wpqa').'">';
-									if ($live_search == "on") {
-										echo '<div class="loader_2 search_loader"></div>
-										<div class="search-results results-empty"></div>';
-									}
-									echo '<button class="button-search"><i class="icon-search"></i></button>
-									<input type="hidden" name="search_type" class="search_type" value="users">
-								</form>';
+							echo '<option value="post_count" '.selected($g_user_filter,"post_count",false).'>'.esc_html__('Posts','wpqa').'</option>
+							<option value="comments" '.selected($g_user_filter,"comments",false).'>'.esc_html__('Comments','wpqa').'</option>
+							</select>
+							</span>
+							</form>';
+						}
+						if ($user_search == "on") {
+							echo '<form method="get" action="'.esc_url(wpqa_get_search_permalink()).'" class="search-input-form main-search-form">
+							<input class="search-input'.($live_search == "on"?" live-search live-search-icon":"").'"'.($live_search == "on"?" autocomplete='off'":"").' type="search" name="search" placeholder="'.esc_attr__('Type to find...','wpqa').'">';
+							if ($live_search == "on") {
+								echo '<div class="loader_2 search_loader"></div>
+								<div class="search-results results-empty"></div>';
 							}
+							echo '<button class="button-search"><i class="icon-search"></i></button>
+							<input type="hidden" name="search_type" class="search_type" value="users">
+							</form>';
+						}
 						echo '</div>';
 					}
 				}else if (is_singular("question")) {
@@ -3113,600 +3115,600 @@ if (!function_exists('wpqa_breadcrumbs')) :
 						</div><!-- End question-stats -->
 					<?php }
 				}
-			echo '</div><!-- End breadcrumb-right -->';
-		}
-		echo '</div>';
-	}
-endif;
-/* Get taxonomy parents */
-if (!function_exists('wpqa_get_taxonomy_parents')) :
-	function wpqa_get_taxonomy_parents( $id, $taxonomy = 'category', $link = false,$main_id = '', $visited = array(), $before = "", $after = "" ) {
-		$out = '';
-		$parent = get_term( $id, $taxonomy );
-		if ( is_wp_error( $parent ) ) {
-			return $parent;
-		}
-		$name = $parent->name;
-		if ( $parent->parent && ( $parent->parent != $parent->term_id ) && is_array($visited) && !in_array( $parent->parent, $visited ) ) {
-			$visited[] = $parent->parent;
-			$out .= $before.wpqa_get_taxonomy_parents( $parent->parent, $taxonomy, $link, $visited, $before, $after ).$after;
-		}
-		if ( $link ) {
-			if ($parent->term_id != $main_id) {
-				$out .= '<a href="' . esc_url( get_term_link( $parent,$taxonomy ) ) . '" title="' . esc_attr( $parent->name ) . '">'.$name.'</a>';
+				echo '</div><!-- End breadcrumb-right -->';
 			}
-		}else {
-			$out .= $name;
-		}
-		return $out;
-	}
-endif;
-/* Get term parents */
-if (!function_exists('wpqa_breadcrumbs_get_term_parents')) :
-	function wpqa_breadcrumbs_get_term_parents( $parent_id = '', $taxonomy = '' ) {
-		$html = array();
-		$parents = array();
-		if ( empty( $parent_id ) || empty( $taxonomy ) )
-			return $parents;
-		while ( $parent_id ) {
-			$parent = get_term( $parent_id, $taxonomy );
-			$parents[] = '<a rel="v:url" property="v:title" href="' . esc_url(get_term_link( $parent, $taxonomy )) . '" title="' . esc_attr( $parent->name ) . '">' . $parent->name . '</a>';
-			$parent_id = $parent->parent;
-		}
-		if ( $parents )
-			$parents = array_reverse( $parents );
-		return $parents;
-	}
-endif;
-/* Before delete post */
-add_action('before_delete_post','wpqa_before_delete_post');
-if (!function_exists('wpqa_before_delete_post')) :
-	function wpqa_before_delete_post($postid) {
-		$get_post = get_post($postid);
-		$post_type = $get_post->post_type;
-		if ($post_type == "question") {
-			$remove_best_answer_stats = wpqa_options("remove_best_answer_stats");
-			$active_points = wpqa_options("active_points");
-			if ($remove_best_answer_stats == "on" && $active_points == "on") {
-				$user_id = $get_post->post_author;
-				if ($user_id > 0) {
-					$point_add_question = (int)wpqa_options("point_add_question");
-					$point_add_question = ($point_add_question > 0?$point_add_question:5);
-					wpqa_add_points($user_id,$point_add_question,"-","delete_question");
-				}
-			}
-		}
-		
-		if (isset($postid) && $postid != "" && ($post_type == "post" || $post_type == "question")) { 
-			$favorites_questions = get_post_meta($postid,"favorites_questions",true);
-			if (isset($favorites_questions) && is_array($favorites_questions) && count($favorites_questions) > 0) {
-				foreach ($favorites_questions as $user_id) {
-					$favorites_questions_user = get_user_meta($user_id,$user_id."_favorites",true);
-					$remove_favorites_questions = wpqa_remove_item_by_value($favorites_questions_user,$postid);
-					update_user_meta($user_id,$user_id."_favorites",$remove_favorites_questions);
-				}
-			}
-			
-			$following_questions = get_post_meta($postid,"following_questions",true);
-			if (isset($following_questions) && is_array($following_questions) && count($following_questions) > 0) {
-				foreach ($following_questions as $user_id) {
-					$following_questions_user = get_user_meta($user_id,"following_questions",true);
-					$remove_following_questions = wpqa_remove_item_by_value($following_questions_user,$postid);
-					update_user_meta($user_id,"following_questions",$remove_following_questions);
-				}
-			}
-		}
-	}
-endif;
-/* Set post & question stats */
-if (!is_admin()) {
-	$active_post_stats = wpqa_options("active_post_stats");
-	if ($active_post_stats == "on") {
-		add_action('wp_head','wpqa_set_post_stats',1000);
-	}
-	if (!function_exists('wpqa_set_post_stats')) :
-		function wpqa_set_post_stats() {
-		    $post_id = get_the_ID();
-		    if (is_single($post_id) || is_page($post_id)) {
-		    	$active_stats = true;
-		    	if (is_single($post_id)) {
-		    		global $post;
-		    		$user_id     = get_current_user_id();
-		    		$yes_private = (is_singular("question")?wpqa_private($post_id,$post->post_author,$user_id):1);
-		    		
-		    		if (!is_super_admin($user_id) && $yes_private != 1) {
-		    			$active_stats = false;
-		    		}
-		    	}
-		    	if ($active_stats == true) {
-		    		$post_meta_stats = wpqa_options("post_meta_stats");
-					$post_meta_stats = ($post_meta_stats != ""?$post_meta_stats:"post_stats");
-			        $current_stats = get_post_meta($post_id,$post_meta_stats,true);
-			        $visit_cookie = wpqa_options("visit_cookie");
-			        if ($visit_cookie != "on" || ($visit_cookie == "on" && !isset($_COOKIE[wpqa_options("uniqid_cookie").'wpqa_post_stats'.$post_id]))) {
-				        if (!isset($current_stats)) {
-				            add_post_meta($post_id,$post_meta_stats,1);
-				        }else {
-				            update_post_meta($post_id,$post_meta_stats,(int)$current_stats+1);
-				        }
-			        }
-			        if ($visit_cookie == "on") {
-			        	setcookie(wpqa_options("uniqid_cookie").'wpqa_post_stats'.$post_id,"wpqa_post_stats",time()+3600*24*365,'/');
-			        }
-		        }
-		    }
+			echo '</div>';
 		}
 	endif;
-}
-/* Update profile */
-if (!function_exists('wpqa_update_profile')) :
-	function wpqa_update_profile($user_id) {
-		$update_profile = "";
-		if (is_user_logged_in()) {
-			$update_profile = get_user_meta($user_id,"update_profile",true);
-			if (is_page()) {
-				global $post;
-				$login_only = get_post_meta($post->ID,prefix_meta."login_only",true);
-				$update_profile = ($update_profile == "yes" && $login_only != "on"?"yes":"no");
+	/* Get taxonomy parents */
+	if (!function_exists('wpqa_get_taxonomy_parents')) :
+		function wpqa_get_taxonomy_parents( $id, $taxonomy = 'category', $link = false,$main_id = '', $visited = array(), $before = "", $after = "" ) {
+			$out = '';
+			$parent = get_term( $id, $taxonomy );
+			if ( is_wp_error( $parent ) ) {
+				return $parent;
 			}
+			$name = $parent->name;
+			if ( $parent->parent && ( $parent->parent != $parent->term_id ) && is_array($visited) && !in_array( $parent->parent, $visited ) ) {
+				$visited[] = $parent->parent;
+				$out .= $before.wpqa_get_taxonomy_parents( $parent->parent, $taxonomy, $link, $visited, $before, $after ).$after;
+			}
+			if ( $link ) {
+				if ($parent->term_id != $main_id) {
+					$out .= '<a href="' . esc_url( get_term_link( $parent,$taxonomy ) ) . '" title="' . esc_attr( $parent->name ) . '">'.$name.'</a>';
+				}
+			}else {
+				$out .= $name;
+			}
+			return $out;
 		}
-		return $update_profile;
-	}
-endif;
-/* Get edit profile page */
-if (!function_exists('wpqa_update_edit_profiel')) :
-	function wpqa_update_edit_profiel($user_id,$update_profile) {
-		if ($update_profile == "yes") {
-			echo '<div class="alert-message"><i class="icon-lamp"></i><p>'.esc_html__("Kindly fill the required fields, You need to fill all the required fields.","wpqa").'</p></div>';
-			$nicename = wpqa_get_user_nicename($user_id);
-			$templates = array(
-				'edit-'.$nicename.'.php',
-				'edit-'.$user_id.'.php',
-				'edit.php',
-				'profile.php',
-			);
-			if (isset($templates) && is_array($templates) && !empty($templates)) {
-				$wpqa_get_template = wpqa_get_template($templates,"profile/");
-				if ($wpqa_get_template) {
-					include $wpqa_get_template;
+	endif;
+	/* Get term parents */
+	if (!function_exists('wpqa_breadcrumbs_get_term_parents')) :
+		function wpqa_breadcrumbs_get_term_parents( $parent_id = '', $taxonomy = '' ) {
+			$html = array();
+			$parents = array();
+			if ( empty( $parent_id ) || empty( $taxonomy ) )
+				return $parents;
+			while ( $parent_id ) {
+				$parent = get_term( $parent_id, $taxonomy );
+				$parents[] = '<a rel="v:url" property="v:title" href="' . esc_url(get_term_link( $parent, $taxonomy )) . '" title="' . esc_attr( $parent->name ) . '">' . $parent->name . '</a>';
+				$parent_id = $parent->parent;
+			}
+			if ( $parents )
+				$parents = array_reverse( $parents );
+			return $parents;
+		}
+	endif;
+	/* Before delete post */
+	add_action('before_delete_post','wpqa_before_delete_post');
+	if (!function_exists('wpqa_before_delete_post')) :
+		function wpqa_before_delete_post($postid) {
+			$get_post = get_post($postid);
+			$post_type = $get_post->post_type;
+			if ($post_type == "question") {
+				$remove_best_answer_stats = wpqa_options("remove_best_answer_stats");
+				$active_points = wpqa_options("active_points");
+				if ($remove_best_answer_stats == "on" && $active_points == "on") {
+					$user_id = $get_post->post_author;
+					if ($user_id > 0) {
+						$point_add_question = (int)wpqa_options("point_add_question");
+						$point_add_question = ($point_add_question > 0?$point_add_question:5);
+						wpqa_add_points($user_id,$point_add_question,"-","delete_question");
+					}
 				}
 			}
-			get_footer();
-			die();
+
+			if (isset($postid) && $postid != "" && ($post_type == "post" || $post_type == "question")) { 
+				$favorites_questions = get_post_meta($postid,"favorites_questions",true);
+				if (isset($favorites_questions) && is_array($favorites_questions) && count($favorites_questions) > 0) {
+					foreach ($favorites_questions as $user_id) {
+						$favorites_questions_user = get_user_meta($user_id,$user_id."_favorites",true);
+						$remove_favorites_questions = wpqa_remove_item_by_value($favorites_questions_user,$postid);
+						update_user_meta($user_id,$user_id."_favorites",$remove_favorites_questions);
+					}
+				}
+
+				$following_questions = get_post_meta($postid,"following_questions",true);
+				if (isset($following_questions) && is_array($following_questions) && count($following_questions) > 0) {
+					foreach ($following_questions as $user_id) {
+						$following_questions_user = get_user_meta($user_id,"following_questions",true);
+						$remove_following_questions = wpqa_remove_item_by_value($following_questions_user,$postid);
+						update_user_meta($user_id,"following_questions",$remove_following_questions);
+					}
+				}
+			}
 		}
-	}
-endif;
-/* Head content */
-add_action('wpqa_head_content', 'wpqa_head_content' );
-if (!function_exists('wpqa_head_content')) :
-	function wpqa_head_content($login = "",$its_not_login = false) {
-		$user_id = get_current_user_id();
-		if (is_user_logged_in()) {
-			$user_is_login = get_userdata($user_id);
-			$roles = $user_is_login->allcaps;
-			if ($login == "") {
-				$active_points_category = wpqa_options("active_points_category");
-				if ($active_points_category == "on") {
-					$categories_user_points = get_user_meta($user_id,"categories_user_points",true);
-					if (is_array($categories_user_points) && !empty($categories_user_points)) {
-						$category_with_points = array();
-						foreach ($categories_user_points as $category) {
-							$category_with_points[$category] = (int)get_user_meta($user_id,"points_category".$category,true);
+	endif;
+	/* Set post & question stats */
+	if (!is_admin()) {
+		$active_post_stats = wpqa_options("active_post_stats");
+		if ($active_post_stats == "on") {
+			add_action('wp_head','wpqa_set_post_stats',1000);
+		}
+		if (!function_exists('wpqa_set_post_stats')) :
+			function wpqa_set_post_stats() {
+				$post_id = get_the_ID();
+				if (is_single($post_id) || is_page($post_id)) {
+					$active_stats = true;
+					if (is_single($post_id)) {
+						global $post;
+						$user_id     = get_current_user_id();
+						$yes_private = (is_singular("question")?wpqa_private($post_id,$post->post_author,$user_id):1);
+
+						if (!is_super_admin($user_id) && $yes_private != 1) {
+							$active_stats = false;
 						}
-						arsort($category_with_points);
-						foreach ($category_with_points as $category => $points) {
-							$get_badge = wpqa_get_badge($user_id,"name",$points);
-							$wpqa_get_badge = get_user_meta($user_id,$get_badge."_".$category,true);
+					}
+					if ($active_stats == true) {
+						$post_meta_stats = wpqa_options("post_meta_stats");
+						$post_meta_stats = ($post_meta_stats != ""?$post_meta_stats:"post_stats");
+						$current_stats = get_post_meta($post_id,$post_meta_stats,true);
+						$visit_cookie = wpqa_options("visit_cookie");
+						if ($visit_cookie != "on" || ($visit_cookie == "on" && !isset($_COOKIE[wpqa_options("uniqid_cookie").'wpqa_post_stats'.$post_id]))) {
+							if (!isset($current_stats)) {
+								add_post_meta($post_id,$post_meta_stats,1);
+							}else {
+								update_post_meta($post_id,$post_meta_stats,(int)$current_stats+1);
+							}
+						}
+						if ($visit_cookie == "on") {
+							setcookie(wpqa_options("uniqid_cookie").'wpqa_post_stats'.$post_id,"wpqa_post_stats",time()+3600*24*365,'/');
+						}
+					}
+				}
+			}
+		endif;
+	}
+	/* Update profile */
+	if (!function_exists('wpqa_update_profile')) :
+		function wpqa_update_profile($user_id) {
+			$update_profile = "";
+			if (is_user_logged_in()) {
+				$update_profile = get_user_meta($user_id,"update_profile",true);
+				if (is_page()) {
+					global $post;
+					$login_only = get_post_meta($post->ID,prefix_meta."login_only",true);
+					$update_profile = ($update_profile == "yes" && $login_only != "on"?"yes":"no");
+				}
+			}
+			return $update_profile;
+		}
+	endif;
+	/* Get edit profile page */
+	if (!function_exists('wpqa_update_edit_profiel')) :
+		function wpqa_update_edit_profiel($user_id,$update_profile) {
+			if ($update_profile == "yes") {
+				echo '<div class="alert-message"><i class="icon-lamp"></i><p>'.esc_html__("Kindly fill the required fields, You need to fill all the required fields.","wpqa").'</p></div>';
+				$nicename = wpqa_get_user_nicename($user_id);
+				$templates = array(
+					'edit-'.$nicename.'.php',
+					'edit-'.$user_id.'.php',
+					'edit.php',
+					'profile.php',
+				);
+				if (isset($templates) && is_array($templates) && !empty($templates)) {
+					$wpqa_get_template = wpqa_get_template($templates,"profile/");
+					if ($wpqa_get_template) {
+						include $wpqa_get_template;
+					}
+				}
+				get_footer();
+				die();
+			}
+		}
+	endif;
+	/* Head content */
+	add_action('wpqa_head_content', 'wpqa_head_content' );
+	if (!function_exists('wpqa_head_content')) :
+		function wpqa_head_content($login = "",$its_not_login = false) {
+			$user_id = get_current_user_id();
+			if (is_user_logged_in()) {
+				$user_is_login = get_userdata($user_id);
+				$roles = $user_is_login->allcaps;
+				if ($login == "") {
+					$active_points_category = wpqa_options("active_points_category");
+					if ($active_points_category == "on") {
+						$categories_user_points = get_user_meta($user_id,"categories_user_points",true);
+						if (is_array($categories_user_points) && !empty($categories_user_points)) {
+							$category_with_points = array();
+							foreach ($categories_user_points as $category) {
+								$category_with_points[$category] = (int)get_user_meta($user_id,"points_category".$category,true);
+							}
+							arsort($category_with_points);
+							foreach ($category_with_points as $category => $points) {
+								$get_badge = wpqa_get_badge($user_id,"name",$points);
+								$wpqa_get_badge = get_user_meta($user_id,$get_badge."_".$category,true);
+								if ($wpqa_get_badge == "" || ($get_badge != $wpqa_get_badge)) {
+									$get_term = get_term($category,'question-category');
+									$new_badge = $get_badge;
+									$get_badge_color = wpqa_get_badge($user_id,"color",$points);
+									update_user_meta($user_id,$get_badge."_".$category,$get_badge);
+									break;
+								}
+							}
+						}
+					}else {
+						$first_key = wpqa_get_badge($user_id,"first_key");
+						if ($first_key === "") {
+							$get_badge = wpqa_get_badge($user_id,"name");
+							$wpqa_get_badge = get_user_meta($user_id,$get_badge,true);
 							if ($wpqa_get_badge == "" || ($get_badge != $wpqa_get_badge)) {
-								$get_term = get_term($category,'question-category');
 								$new_badge = $get_badge;
-								$get_badge_color = wpqa_get_badge($user_id,"color",$points);
-								update_user_meta($user_id,$get_badge."_".$category,$get_badge);
-								break;
+								$get_badge_color = wpqa_get_badge($user_id,"color");
+								update_user_meta($user_id,$get_badge,$get_badge);
 							}
 						}
 					}
-				}else {
-					$first_key = wpqa_get_badge($user_id,"first_key");
-					if ($first_key === "") {
-						$get_badge = wpqa_get_badge($user_id,"name");
-						$wpqa_get_badge = get_user_meta($user_id,$get_badge,true);
-						if ($wpqa_get_badge == "" || ($get_badge != $wpqa_get_badge)) {
-							$new_badge = $get_badge;
-							$get_badge_color = wpqa_get_badge($user_id,"color");
-							update_user_meta($user_id,$get_badge,$get_badge);
-						}
+					if (isset($new_badge) && $new_badge != "") {
+						do_action("wpqa_action_get_new_badge",$user_id,$new_badge,(isset($category) && $category > 0?$category:0),(isset($points) && $points > 0?$points:0));
 					}
 				}
-				if (isset($new_badge) && $new_badge != "") {
-					do_action("wpqa_action_get_new_badge",$user_id,$new_badge,(isset($category) && $category > 0?$category:0),(isset($points) && $points > 0?$points:0));
-				}
 			}
-		}
-		if ($login != "login" || $login == "") {
-			$confirm_email = wpqa_options("confirm_email");
-			if ($login != "login" && is_user_logged_in() && $confirm_email == "on") {
-				$if_user_id = get_user_by("id",$user_id);
-				if (isset($if_user_id->caps["activation"]) && $if_user_id->caps["activation"] == 1) {
-					$site_users_only = "yes";
+			if ($login != "login" || $login == "") {
+				$confirm_email = wpqa_options("confirm_email");
+				if ($login != "login" && is_user_logged_in() && $confirm_email == "on") {
+					$if_user_id = get_user_by("id",$user_id);
+					if (isset($if_user_id->caps["activation"]) && $if_user_id->caps["activation"] == 1) {
+						$site_users_only = "yes";
+					}
 				}
-			}
-			
-			if (($login == "" && isset($new_badge) && $new_badge != "") || ($login != "login" && isset($_POST["form_type"]) && (($_POST["form_type"] == "add_question" && isset($_POST["question_popup"]) && $_POST["question_popup"] == "popup") || ($_POST["form_type"] == "add_post" && isset($_POST["post_popup"]) && $_POST["post_popup"] == "popup") || ($_POST["form_type"] == "add_message" && isset($_POST["message_popup"]) && $_POST["message_popup"] == "popup") || $_POST["form_type"] == "wpqa-signup" || $_POST["form_type"] == "wpqa-login" || $_POST["form_type"] == "wpqa-forget"))) {?>
-				<script type="text/javascript">
-					jQuery(document).ready(function($) {
-						function wrap_pop() {
-							jQuery(".wrap-pop").on("click",function () {
-								jQuery.when(jQuery(".panel-pop").fadeOut(200)).done(function() {
-									jQuery(this).css({"top":"-100%","display":"none"});
-									jQuery(".wrap-pop").remove();
+
+				if (($login == "" && isset($new_badge) && $new_badge != "") || ($login != "login" && isset($_POST["form_type"]) && (($_POST["form_type"] == "add_question" && isset($_POST["question_popup"]) && $_POST["question_popup"] == "popup") || ($_POST["form_type"] == "add_post" && isset($_POST["post_popup"]) && $_POST["post_popup"] == "popup") || ($_POST["form_type"] == "add_message" && isset($_POST["message_popup"]) && $_POST["message_popup"] == "popup") || $_POST["form_type"] == "wpqa-signup" || $_POST["form_type"] == "wpqa-login" || $_POST["form_type"] == "wpqa-forget"))) {?>
+					<script type="text/javascript">
+						jQuery(document).ready(function($) {
+							function wrap_pop() {
+								jQuery(".wrap-pop").on("click",function () {
+									jQuery.when(jQuery(".panel-pop").fadeOut(200)).done(function() {
+										jQuery(this).css({"top":"-100%","display":"none"});
+										jQuery(".wrap-pop").remove();
+									});
 								});
-							});
-						}
-						
-						<?php if ($login == "" && isset($new_badge) && $new_badge != "") {
-							$pop_up = $form_type = "wpqa-badge";
-						}else if ($login != "login") {
-							$form_type = (isset($_POST["form_type"])?esc_html($_POST["form_type"]):"");
-							if ($form_type == "wpqa-signup") {
-								$pop_up = "signup-panel";
-							}else if ($form_type == "wpqa-forget") {
-								$pop_up = "lost-password";
-							}else if ($form_type == "wpqa-login") {
-								$pop_up = "login-panel";
-							}else if ($form_type == "add_question" && isset($_POST["user_id"]) && esc_html($_POST["user_id"]) != "" && isset($_POST["question_popup"]) && $_POST["question_popup"] == "popup") {
-								$pop_up = "wpqa-question-user";
-							}else if ($form_type == "add_question" && isset($_POST["question_popup"]) && $_POST["question_popup"] == "popup") {
-								$pop_up = "wpqa-question";
-							}else if ($form_type == "add_post" && isset($_POST["post_popup"]) && $_POST["post_popup"] == "popup") {
-								$pop_up = "wpqa-post";
-							}else if ($form_type == "add_message" && isset($_POST["message_popup"]) && $_POST["message_popup"] == "popup") {
-								$pop_up = "wpqa-message";
 							}
-						}
-						if (isset($pop_up) && $pop_up != "") {?>
-							panel_pop("#<?php echo esc_js($pop_up)?>","<?php echo esc_js($form_type)?>");
-							
-							function panel_pop(whatId,fromType) {
+
+							<?php if ($login == "" && isset($new_badge) && $new_badge != "") {
+								$pop_up = $form_type = "wpqa-badge";
+							}else if ($login != "login") {
+								$form_type = (isset($_POST["form_type"])?esc_html($_POST["form_type"]):"");
+								if ($form_type == "wpqa-signup") {
+									$pop_up = "signup-panel";
+								}else if ($form_type == "wpqa-forget") {
+									$pop_up = "lost-password";
+								}else if ($form_type == "wpqa-login") {
+									$pop_up = "login-panel";
+								}else if ($form_type == "add_question" && isset($_POST["user_id"]) && esc_html($_POST["user_id"]) != "" && isset($_POST["question_popup"]) && $_POST["question_popup"] == "popup") {
+									$pop_up = "wpqa-question-user";
+								}else if ($form_type == "add_question" && isset($_POST["question_popup"]) && $_POST["question_popup"] == "popup") {
+									$pop_up = "wpqa-question";
+								}else if ($form_type == "add_post" && isset($_POST["post_popup"]) && $_POST["post_popup"] == "popup") {
+									$pop_up = "wpqa-post";
+								}else if ($form_type == "add_message" && isset($_POST["message_popup"]) && $_POST["message_popup"] == "popup") {
+									$pop_up = "wpqa-message";
+								}
+							}
+							if (isset($pop_up) && $pop_up != "") {?>
+								panel_pop("#<?php echo esc_js($pop_up)?>","<?php echo esc_js($form_type)?>");
+
+								function panel_pop(whatId,fromType) {
 								var data_width = jQuery(whatId).attr("data-width");
 								jQuery(".panel-pop").css({"top":"-100%","display":"none"});
 								jQuery(".wrap-pop").remove();
 								var cssMargin = (jQuery("body.rtl").length?"margin-right":"margin-left");
 								var cssValue = "-"+(data_width !== undefined && data_width !== false?data_width/2:"")+"px";
 								if (jQuery(whatId).length) {
-									jQuery(whatId).css("width",(data_width !== undefined && data_width !== false?data_width:"")+"px").css(cssMargin,cssValue).show().animate({"top":"7%"},200);
-									jQuery("html,body").animate({scrollTop:0},200);
-									jQuery("body").prepend("<div class='wrap-pop'></div>");
-								}
-								wrap_pop();
+								jQuery(whatId).css("width",(data_width !== undefined && data_width !== false?data_width:"")+"px").css(cssMargin,cssValue).show().animate({"top":"7%"},200);
+								jQuery("html,body").animate({scrollTop:0},200);
+								jQuery("body").prepend("<div class='wrap-pop'></div>");
 							}
-						<?php }?>
-					});
-				</script>
-			<?php }
-		}
-		
-		if (is_user_logged_in() && isset($new_badge) && $new_badge != "") {
-			$site_users_only = wpqa_site_users_only();
-			if ($site_users_only != "yes" && !is_page_template("template-landing.php")) {?>
-				<div class="panel-pop" id="wpqa-badge" data-width="690">
-					<i class="icon-cancel"></i>
-					<div class="panel-pop-content">
-						<div class="new_badge" style='color: <?php echo esc_attr($get_badge_color)?>'><span class="wings-shape"><i class="icon-bucket"></i></span></div>
-						<h3><?php esc_html_e("You just unlocked a new badge!","wpqa")?></h3>
-						<p><?php echo sprintf(esc_html__("Woohoo! You've earned the %s badge%s, here's a new badge to celebrate! Looking for more? Browse the complete list of questions, or popular tags. Help us answer unanswered questions.","wpqa"),"\"<span style='color: ".$get_badge_color."'>".$new_badge."</span>\"",(isset($category) && $category > 0 && isset($get_term) && isset($get_term->slug)?" ".esc_html__("in the","wpqa")." <a href='".get_term_link($get_term->slug,'question-category')."'>".$get_term->name."</a>"." ".esc_html__("category","wpqa"):""))?></p>
-						<?php $pages = get_pages(array('meta_key' => '_wp_page_template','meta_value' => 'template-badges.php'));
-						if (isset($pages) && isset($pages[0]) && isset($pages[0]->ID)) {?>
-							<a class="button-default" href="<?php echo get_the_permalink($pages[0]->ID)?>"><?php esc_html_e("Earn More Points!","wpqa")?></a>
-						<?php }?>
-					</div><!-- End panel-pop-content -->
-				</div><!-- End wpqa-badge -->
-			<?php }
-		}else {
-			$signup_style = wpqa_options("signup_style");?>
-			<div class="<?php echo ($its_not_login == true?'panel-signup panel-un-login':'panel-pop'.($its_not_login != true && $signup_style == "style_2"?" panel-pop-image":""))?>"<?php echo($its_not_login != true && $signup_style == "style_2"?' data-width="770"':'')?> id="signup-panel">
-				<?php echo ($its_not_login == true?'':'<i class="icon-cancel"></i>');
-				$signup_details = wpqa_options("signup_details");
-				if ($its_not_login == true || $signup_style != "style_2") {
-					$logo_signup = wpqa_image_url_id(wpqa_options("logo_signup"));
-					$logo_signup_retina = wpqa_image_url_id(wpqa_options("logo_signup_retina"));
-					$logo_signup_height = wpqa_options("logo_signup_height");
-					$logo_signup_width = wpqa_options("logo_signup_width");
-					$text_signup = wpqa_options("text_signup");
-				}?>
-				<div class="pop-border-radius">
-					<?php if ($its_not_login == true || $signup_style != "style_2") {?>
-						<div class="pop-header">
-							<h3>
-								<?php if ($logo_signup != "" || $logo_signup_retina != "") {
-									if ($logo_signup != "" || ($logo_signup_retina == "" && $logo_signup != "")) {?>
-										<img width="<?php echo esc_attr($logo_signup_width)?>" height="<?php echo esc_attr($logo_signup_height)?>" class="signup-logo <?php echo ($logo_signup_retina == "" && $logo_signup != ""?"retina_screen":"default_screen")?>" alt="<?php esc_attr_e("Sign Up","wpqa")?>" src="<?php echo esc_url($logo_signup)?>">
-									<?php }
-									if ($logo_signup_retina != "") {?>
-										<img width="<?php echo esc_attr($logo_signup_width)?>" height="<?php echo esc_attr($logo_signup_height)?>" class="signup-logo retina_screen" alt="<?php esc_attr_e("Sign Up","wpqa")?>" src="<?php echo esc_url($logo_signup_retina)?>">
-									<?php }
-								}else {
-									esc_html_e("Sign Up","wpqa");
-								}?>
-							</h3>
-							<?php if ($text_signup != "") {?>
-								<p><?php echo wpqa_kses_stip($text_signup)?></p>
-							<?php }?>
-						</div><!-- End pop-header -->
-					<?php }
-					if ($its_not_login != true && $signup_style == "style_2") {?>
-						<div class="panel-image-content">
-							<div class="panel-image-opacity"></div>
-							<div class="panel-image-inner">
-								<h3><?php esc_html_e("Sign Up","wpqa");?></h3>
-								<?php if ($signup_details != "") {?>
-									<p><?php echo wpqa_kses_stip($signup_details)?></p>
-								<?php }?>
-							</div><!-- End panel-image-inner -->
-							<?php echo ' <a href="#" class="login-panel button-default">'.esc_html__( 'Have an account?', 'wpqa' ).' '.esc_html__( 'Sign In', 'wpqa' ).'</a>';?>
-						</div><!-- End panel-image-content -->
+							wrap_pop();
+						}
 					<?php }?>
-					<div class="panel-pop-content">
-						<?php echo do_shortcode("[wpqa_signup]");?>
-					</div><!-- End pop-border-radius -->
-				</div><!-- End pop-border-radius -->
-				<?php if ($its_not_login == true || $signup_style != "style_2") {?>
-					<div class="pop-footer">
-						<?php echo esc_html__( 'Have an account?', 'wpqa' ).' <a href="#" class="'.($its_not_login == true?'login-panel-un':'login-panel').'">'.esc_html__( 'Sign In Now', 'wpqa' ).'</a>';?>
-					</div><!-- End pop-footer -->
-				<?php }?>
-			</div><!-- End signup -->
-			
-			<?php $login_style = wpqa_options("login_style");?>
-			<div class="<?php echo ($its_not_login == true?'panel-login panel-un-login':'panel-pop'.($its_not_login != true && $login_style == "style_2"?" panel-pop-image":""))?>"<?php echo($its_not_login != true && $login_style == "style_2"?' data-width="770"':'')?> id="login-panel">
-				<?php echo ($its_not_login == true?'':'<i class="icon-cancel"></i>');
-				$login_details = wpqa_options("login_details");
-				if ($its_not_login == true || $login_style != "style_2") {
-					$logo_login = wpqa_image_url_id(wpqa_options("logo_login"));
-					$logo_login_retina = wpqa_image_url_id(wpqa_options("logo_login_retina"));
-					$logo_login_height = wpqa_options("logo_login_height");
-					$logo_login_width = wpqa_options("logo_login_width");
-					$text_login = wpqa_options("text_login");
-				}?>
-				<div class="pop-border-radius">
-					<?php if ($its_not_login == true || $login_style != "style_2") {?>
-						<div class="pop-header">
-							<h3>
-								<?php if ($logo_login != "" || $logo_login_retina != "") {
-									if ($logo_login != "" || ($logo_login_retina == "" && $logo_login != "")) {?>
-										<img width="<?php echo esc_attr($logo_login_width)?>" height="<?php echo esc_attr($logo_login_height)?>" class="login-logo <?php echo ($logo_login_retina == "" && $logo_login != ""?"retina_screen":"default_screen")?>" alt="<?php esc_attr_e("Sign In","wpqa")?>" src="<?php echo esc_url($logo_login)?>">
-									<?php }
-									if ($logo_login_retina != "") {?>
-										<img width="<?php echo esc_attr($logo_login_width)?>" height="<?php echo esc_attr($logo_login_height)?>" class="login-logo retina_screen" alt="<?php esc_attr_e("Sign In","wpqa")?>" src="<?php echo esc_url($logo_login_retina)?>">
-									<?php }
-								}else {
-									esc_html_e("Sign In","wpqa");
-								}?>
-							</h3>
-							<?php if ($text_login != "") {?>
-								<p><?php echo wpqa_kses_stip($text_login)?></p>
-							<?php }?>
-						</div><!-- End pop-header -->
-					<?php }
-					if ($its_not_login != true && $login_style == "style_2") {?>
-						<div class="panel-image-content">
-							<div class="panel-image-opacity"></div>
-							<div class="panel-image-inner">
-								<h3><?php esc_html_e("Sign In","wpqa");?></h3>
-								<?php if ($login_details != "") {?>
-									<p><?php echo wpqa_kses_stip($login_details)?></p>
-								<?php }?>
-							</div><!-- End panel-image-inner -->
-							<?php echo ' <a href="#" class="signup-panel button-default">'.esc_html__( 'Sign Up Here', 'wpqa' ).'</a>';?>
-						</div><!-- End panel-image-content -->
-					<?php }?>
-					<div class="panel-pop-content">
-						<?php echo do_shortcode("[wpqa_login".($its_not_login == true?" un-login='true'":"")."]");?>
-					</div><!-- End panel-pop-content -->
-				</div><!-- End pop-border-radius -->
-				<?php if ($its_not_login == true || $login_style != "style_2") {?>
-					<div class="pop-footer">
-						<?php echo esc_html__( "Don't have account,", 'wpqa' ).' <a href="#" class="'.($its_not_login == true?'signup-panel-un':'signup-panel').'">'.esc_html__( 'Sign Up Here', 'wpqa' ).'</a>';?>
-					</div><!-- End pop-footer -->
-				<?php }?>
-			</div><!-- End login-panel -->
-			
-			<?php $pass_style = wpqa_options("pass_style");?>
-			<div class="<?php echo ($its_not_login == true?'panel-password panel-un-login':'panel-pop'.($its_not_login != true && $pass_style == "style_2"?" panel-pop-image":""))?>"<?php echo($its_not_login != true && $pass_style == "style_2"?' data-width="770"':'')?> id="lost-password">
-				<?php echo ($its_not_login == true?'':'<i class="icon-cancel"></i>');
-				$pass_details = wpqa_options("pass_details");
-				if ($its_not_login == true || $pass_style != "style_2") {
-					$logo_pass = wpqa_image_url_id(wpqa_options("logo_pass"));
-					$logo_pass_retina = wpqa_image_url_id(wpqa_options("logo_pass_retina"));
-					$logo_pass_height = wpqa_options("logo_pass_height");
-					$logo_pass_width = wpqa_options("logo_pass_width");
-					$text_pass = wpqa_options("text_pass");
-				}?>
-				<div class="pop-border-radius">
-					<?php if ($its_not_login == true || $pass_style != "style_2") {?>
-						<div class="pop-header">
-							<h3>
-								<?php if ($logo_pass != "" || $logo_pass_retina != "") {
-									if ($logo_pass != "" || ($logo_pass_retina == "" && $logo_pass != "")) {?>
-										<img width="<?php echo esc_attr($logo_pass_width)?>" height="<?php echo esc_attr($logo_pass_height)?>" class="pass-logo <?php echo ($logo_pass_retina == "" && $logo_pass != ""?"retina_screen":"default_screen")?>" alt="<?php esc_attr_e("Forget Password","wpqa")?>" src="<?php echo esc_url($logo_pass)?>">
-									<?php }
-									if ($logo_pass_retina != "") {?>
-										<img width="<?php echo esc_attr($logo_pass_width)?>" height="<?php echo esc_attr($logo_pass_height)?>" class="pass-logo retina_screen" alt="<?php esc_attr_e("Forget Password","wpqa")?>" src="<?php echo esc_url($logo_pass_retina)?>">
-									<?php }
-								}else {
-									esc_html_e("Forget Password","wpqa");
-								}?>
-							</h3>
-							<?php if ($text_pass != "") {?>
-								<p><?php echo wpqa_kses_stip($text_pass)?></p>
-							<?php }?>
-						</div><!-- End pop-header -->
-					<?php }
-					if ($its_not_login != true && $pass_style == "style_2") {?>
-						<div class="panel-image-content">
-							<div class="panel-image-opacity"></div>
-							<div class="panel-image-inner">
-								<h3><?php esc_html_e("Forget Password","wpqa");?></h3>
-								<?php if ($pass_details != "") {?>
-									<p><?php echo wpqa_kses_stip($pass_details)?></p>
-								<?php }?>
-							</div><!-- End panel-image-inner -->
-						</div><!-- End panel-image-content -->
-					<?php }?>
-					<div class="panel-pop-content">
-						<?php echo do_shortcode("[wpqa_lost_pass".($its_not_login != true && $pass_style == "style_2"?" text='true'":"")."]");?>
-					</div><!-- End panel-pop-content -->
-				</div><!-- End pop-border-radius -->
-				<?php if ($its_not_login == true || $pass_style != "style_2") {?>
-					<div class="pop-footer">
-						<?php echo esc_html__( 'Have an account?', 'wpqa' ).' <a href="#" class="'.($its_not_login == true?'login-panel-un':'login-panel').'">'.esc_html__( 'Sign In Now', 'wpqa' ).'</a>';?>
-					</div><!-- End pop-footer -->
-				<?php }?>
-			</div><!-- End lost-password -->
+				});
+			</script>
 		<?php }
-		
-		$confirm_email = wpqa_users_confirm_mail();
-		if ($confirm_email != "yes" && $login != "login") {
-			$pay_ask = wpqa_options("pay_ask");
-			$custom_permission = wpqa_options("custom_permission");
-			$ask_question_no_register = wpqa_options("ask_question_no_register");
-			$ask_question = wpqa_options("ask_question");
-			if (($custom_permission == "on" && is_user_logged_in() && empty($roles["ask_question"])) || ($custom_permission == "on" && !is_user_logged_in() && $ask_question != "on")) {
-				if (!is_user_logged_in()) {
-					$register = true;
-				}
-			}else if (!is_user_logged_in() && $ask_question_no_register != "on") {
-				$register = true;
-			}else {
-				if (!is_user_logged_in() && $pay_ask == "on") {
-					$register = true;
-				}
-			}?>
-			<div class="panel-pop" id="wpqa-question"<?php echo (isset($register) && $register == true?"":' data-width="690"')?>>
+	}
+
+	if (is_user_logged_in() && isset($new_badge) && $new_badge != "") {
+		$site_users_only = wpqa_site_users_only();
+		if ($site_users_only != "yes" && !is_page_template("template-landing.php")) {?>
+			<div class="panel-pop" id="wpqa-badge" data-width="690">
 				<i class="icon-cancel"></i>
 				<div class="panel-pop-content">
-					<?php echo do_shortcode("[wpqa_question popup='popup']");?>
+					<div class="new_badge" style='color: <?php echo esc_attr($get_badge_color)?>'><span class="wings-shape"><i class="icon-bucket"></i></span></div>
+					<h3><?php esc_html_e("You just unlocked a new badge!","wpqa")?></h3>
+					<p><?php echo sprintf(esc_html__("Woohoo! You've earned the %s badge%s, here's a new badge to celebrate! Looking for more? Browse the complete list of questions, or popular tags. Help us answer unanswered questions.","wpqa"),"\"<span style='color: ".$get_badge_color."'>".$new_badge."</span>\"",(isset($category) && $category > 0 && isset($get_term) && isset($get_term->slug)?" ".esc_html__("in the","wpqa")." <a href='".get_term_link($get_term->slug,'question-category')."'>".$get_term->name."</a>"." ".esc_html__("category","wpqa"):""))?></p>
+					<?php $pages = get_pages(array('meta_key' => '_wp_page_template','meta_value' => 'template-badges.php'));
+					if (isset($pages) && isset($pages[0]) && isset($pages[0]->ID)) {?>
+						<a class="button-default" href="<?php echo get_the_permalink($pages[0]->ID)?>"><?php esc_html_e("Earn More Points!","wpqa")?></a>
+					<?php }?>
+				</div><!-- End panel-pop-content -->
+			</div><!-- End wpqa-badge -->
+		<?php }
+	}else {
+		$signup_style = wpqa_options("signup_style");?>
+		<div class="<?php echo ($its_not_login == true?'panel-signup panel-un-login':'panel-pop'.($its_not_login != true && $signup_style == "style_2"?" panel-pop-image":""))?>"<?php echo($its_not_login != true && $signup_style == "style_2"?' data-width="770"':'')?> id="signup-panel">
+			<?php echo ($its_not_login == true?'':'<i class="icon-cancel"></i>');
+			$signup_details = wpqa_options("signup_details");
+			if ($its_not_login == true || $signup_style != "style_2") {
+				$logo_signup = wpqa_image_url_id(wpqa_options("logo_signup"));
+				$logo_signup_retina = wpqa_image_url_id(wpqa_options("logo_signup_retina"));
+				$logo_signup_height = wpqa_options("logo_signup_height");
+				$logo_signup_width = wpqa_options("logo_signup_width");
+				$text_signup = wpqa_options("text_signup");
+			}?>
+			<div class="pop-border-radius">
+				<?php if ($its_not_login == true || $signup_style != "style_2") {?>
+					<div class="pop-header">
+						<h3>
+							<?php if ($logo_signup != "" || $logo_signup_retina != "") {
+								if ($logo_signup != "" || ($logo_signup_retina == "" && $logo_signup != "")) {?>
+									<img width="<?php echo esc_attr($logo_signup_width)?>" height="<?php echo esc_attr($logo_signup_height)?>" class="signup-logo <?php echo ($logo_signup_retina == "" && $logo_signup != ""?"retina_screen":"default_screen")?>" alt="<?php esc_attr_e("Sign Up","wpqa")?>" src="<?php echo esc_url($logo_signup)?>">
+								<?php }
+								if ($logo_signup_retina != "") {?>
+									<img width="<?php echo esc_attr($logo_signup_width)?>" height="<?php echo esc_attr($logo_signup_height)?>" class="signup-logo retina_screen" alt="<?php esc_attr_e("Sign Up","wpqa")?>" src="<?php echo esc_url($logo_signup_retina)?>">
+								<?php }
+							}else {
+								esc_html_e("Sign Up","wpqa");
+							}?>
+						</h3>
+						<?php if ($text_signup != "") {?>
+							<p><?php echo wpqa_kses_stip($text_signup)?></p>
+						<?php }?>
+					</div><!-- End pop-header -->
+				<?php }
+				if ($its_not_login != true && $signup_style == "style_2") {?>
+					<div class="panel-image-content">
+						<div class="panel-image-opacity"></div>
+						<div class="panel-image-inner">
+							<h3><?php esc_html_e("Sign Up","wpqa");?></h3>
+							<?php if ($signup_details != "") {?>
+								<p><?php echo wpqa_kses_stip($signup_details)?></p>
+							<?php }?>
+						</div><!-- End panel-image-inner -->
+						<?php echo ' <a href="#" class="login-panel button-default">'.esc_html__( 'Have an account?', 'wpqa' ).' '.esc_html__( 'Sign In', 'wpqa' ).'</a>';?>
+					</div><!-- End panel-image-content -->
+				<?php }?>
+				<div class="panel-pop-content">
+					<?php echo do_shortcode("[wpqa_signup]");?>
+				</div><!-- End pop-border-radius -->
+			</div><!-- End pop-border-radius -->
+			<?php if ($its_not_login == true || $signup_style != "style_2") {?>
+				<div class="pop-footer">
+					<?php echo esc_html__( 'Have an account?', 'wpqa' ).' <a href="#" class="'.($its_not_login == true?'login-panel-un':'login-panel').'">'.esc_html__( 'Sign In Now', 'wpqa' ).'</a>';?>
+				</div><!-- End pop-footer -->
+			<?php }?>
+		</div><!-- End signup -->
+
+		<?php $login_style = wpqa_options("login_style");?>
+		<div class="<?php echo ($its_not_login == true?'panel-login panel-un-login':'panel-pop'.($its_not_login != true && $login_style == "style_2"?" panel-pop-image":""))?>"<?php echo($its_not_login != true && $login_style == "style_2"?' data-width="770"':'')?> id="login-panel">
+			<?php echo ($its_not_login == true?'':'<i class="icon-cancel"></i>');
+			$login_details = wpqa_options("login_details");
+			if ($its_not_login == true || $login_style != "style_2") {
+				$logo_login = wpqa_image_url_id(wpqa_options("logo_login"));
+				$logo_login_retina = wpqa_image_url_id(wpqa_options("logo_login_retina"));
+				$logo_login_height = wpqa_options("logo_login_height");
+				$logo_login_width = wpqa_options("logo_login_width");
+				$text_login = wpqa_options("text_login");
+			}?>
+			<div class="pop-border-radius">
+				<?php if ($its_not_login == true || $login_style != "style_2") {?>
+					<div class="pop-header">
+						<h3>
+							<?php if ($logo_login != "" || $logo_login_retina != "") {
+								if ($logo_login != "" || ($logo_login_retina == "" && $logo_login != "")) {?>
+									<img width="<?php echo esc_attr($logo_login_width)?>" height="<?php echo esc_attr($logo_login_height)?>" class="login-logo <?php echo ($logo_login_retina == "" && $logo_login != ""?"retina_screen":"default_screen")?>" alt="<?php esc_attr_e("Sign In","wpqa")?>" src="<?php echo esc_url($logo_login)?>">
+								<?php }
+								if ($logo_login_retina != "") {?>
+									<img width="<?php echo esc_attr($logo_login_width)?>" height="<?php echo esc_attr($logo_login_height)?>" class="login-logo retina_screen" alt="<?php esc_attr_e("Sign In","wpqa")?>" src="<?php echo esc_url($logo_login_retina)?>">
+								<?php }
+							}else {
+								esc_html_e("Sign In","wpqa");
+							}?>
+						</h3>
+						<?php if ($text_login != "") {?>
+							<p><?php echo wpqa_kses_stip($text_login)?></p>
+						<?php }?>
+					</div><!-- End pop-header -->
+				<?php }
+				if ($its_not_login != true && $login_style == "style_2") {?>
+					<div class="panel-image-content">
+						<div class="panel-image-opacity"></div>
+						<div class="panel-image-inner">
+							<h3><?php esc_html_e("Sign In","wpqa");?></h3>
+							<?php if ($login_details != "") {?>
+								<p><?php echo wpqa_kses_stip($login_details)?></p>
+							<?php }?>
+						</div><!-- End panel-image-inner -->
+						<?php echo ' <a href="#" class="signup-panel button-default">'.esc_html__( 'Sign Up Here', 'wpqa' ).'</a>';?>
+					</div><!-- End panel-image-content -->
+				<?php }?>
+				<div class="panel-pop-content">
+					<?php echo do_shortcode("[wpqa_login".($its_not_login == true?" un-login='true'":"")."]");?>
+				</div><!-- End panel-pop-content -->
+			</div><!-- End pop-border-radius -->
+			<?php if ($its_not_login == true || $login_style != "style_2") {?>
+				<div class="pop-footer">
+					<?php echo esc_html__( "Don't have account,", 'wpqa' ).' <a href="#" class="'.($its_not_login == true?'signup-panel-un':'signup-panel').'">'.esc_html__( 'Sign Up Here', 'wpqa' ).'</a>';?>
+				</div><!-- End pop-footer -->
+			<?php }?>
+		</div><!-- End login-panel -->
+
+		<?php $pass_style = wpqa_options("pass_style");?>
+		<div class="<?php echo ($its_not_login == true?'panel-password panel-un-login':'panel-pop'.($its_not_login != true && $pass_style == "style_2"?" panel-pop-image":""))?>"<?php echo($its_not_login != true && $pass_style == "style_2"?' data-width="770"':'')?> id="lost-password">
+			<?php echo ($its_not_login == true?'':'<i class="icon-cancel"></i>');
+			$pass_details = wpqa_options("pass_details");
+			if ($its_not_login == true || $pass_style != "style_2") {
+				$logo_pass = wpqa_image_url_id(wpqa_options("logo_pass"));
+				$logo_pass_retina = wpqa_image_url_id(wpqa_options("logo_pass_retina"));
+				$logo_pass_height = wpqa_options("logo_pass_height");
+				$logo_pass_width = wpqa_options("logo_pass_width");
+				$text_pass = wpqa_options("text_pass");
+			}?>
+			<div class="pop-border-radius">
+				<?php if ($its_not_login == true || $pass_style != "style_2") {?>
+					<div class="pop-header">
+						<h3>
+							<?php if ($logo_pass != "" || $logo_pass_retina != "") {
+								if ($logo_pass != "" || ($logo_pass_retina == "" && $logo_pass != "")) {?>
+									<img width="<?php echo esc_attr($logo_pass_width)?>" height="<?php echo esc_attr($logo_pass_height)?>" class="pass-logo <?php echo ($logo_pass_retina == "" && $logo_pass != ""?"retina_screen":"default_screen")?>" alt="<?php esc_attr_e("Forget Password","wpqa")?>" src="<?php echo esc_url($logo_pass)?>">
+								<?php }
+								if ($logo_pass_retina != "") {?>
+									<img width="<?php echo esc_attr($logo_pass_width)?>" height="<?php echo esc_attr($logo_pass_height)?>" class="pass-logo retina_screen" alt="<?php esc_attr_e("Forget Password","wpqa")?>" src="<?php echo esc_url($logo_pass_retina)?>">
+								<?php }
+							}else {
+								esc_html_e("Forget Password","wpqa");
+							}?>
+						</h3>
+						<?php if ($text_pass != "") {?>
+							<p><?php echo wpqa_kses_stip($text_pass)?></p>
+						<?php }?>
+					</div><!-- End pop-header -->
+				<?php }
+				if ($its_not_login != true && $pass_style == "style_2") {?>
+					<div class="panel-image-content">
+						<div class="panel-image-opacity"></div>
+						<div class="panel-image-inner">
+							<h3><?php esc_html_e("Forget Password","wpqa");?></h3>
+							<?php if ($pass_details != "") {?>
+								<p><?php echo wpqa_kses_stip($pass_details)?></p>
+							<?php }?>
+						</div><!-- End panel-image-inner -->
+					</div><!-- End panel-image-content -->
+				<?php }?>
+				<div class="panel-pop-content">
+					<?php echo do_shortcode("[wpqa_lost_pass".($its_not_login != true && $pass_style == "style_2"?" text='true'":"")."]");?>
+				</div><!-- End panel-pop-content -->
+			</div><!-- End pop-border-radius -->
+			<?php if ($its_not_login == true || $pass_style != "style_2") {?>
+				<div class="pop-footer">
+					<?php echo esc_html__( 'Have an account?', 'wpqa' ).' <a href="#" class="'.($its_not_login == true?'login-panel-un':'login-panel').'">'.esc_html__( 'Sign In Now', 'wpqa' ).'</a>';?>
+				</div><!-- End pop-footer -->
+			<?php }?>
+		</div><!-- End lost-password -->
+	<?php }
+
+	$confirm_email = wpqa_users_confirm_mail();
+	if ($confirm_email != "yes" && $login != "login") {
+		$pay_ask = wpqa_options("pay_ask");
+		$custom_permission = wpqa_options("custom_permission");
+		$ask_question_no_register = wpqa_options("ask_question_no_register");
+		$ask_question = wpqa_options("ask_question");
+		if (($custom_permission == "on" && is_user_logged_in() && empty($roles["ask_question"])) || ($custom_permission == "on" && !is_user_logged_in() && $ask_question != "on")) {
+			if (!is_user_logged_in()) {
+				$register = true;
+			}
+		}else if (!is_user_logged_in() && $ask_question_no_register != "on") {
+			$register = true;
+		}else {
+			if (!is_user_logged_in() && $pay_ask == "on") {
+				$register = true;
+			}
+		}?>
+		<div class="panel-pop" id="wpqa-question"<?php echo (isset($register) && $register == true?"":' data-width="690"')?>>
+			<i class="icon-cancel"></i>
+			<div class="panel-pop-content">
+				<?php echo do_shortcode("[wpqa_question popup='popup']");?>
+			</div><!-- End panel-pop-content -->
+			<?php if (isset($register) && $register == true) {?>
+				<div class="pop-footer">
+					<?php echo esc_html__( 'Need An Account,', 'wpqa' ).' <a href="#" class="signup-panel">'.esc_html__( 'Sign Up Here', 'wpqa' ).'</a>';?>
+				</div><!-- End pop-footer -->
+			<?php }?>
+		</div><!-- End wpqa-question -->
+
+		<?php $ask_question_to_users = wpqa_options("ask_question_to_users");
+		if ($ask_question_to_users == "on" && wpqa_is_user_profile()) {?>
+			<div class="panel-pop" id="wpqa-question-user"<?php echo (isset($register) && $register == true?"":' data-width="690"')?>>
+				<i class="icon-cancel"></i>
+				<div class="panel-pop-content">
+					<?php echo do_shortcode("[wpqa_question type='user' popup='popup']");?>
 				</div><!-- End panel-pop-content -->
 				<?php if (isset($register) && $register == true) {?>
 					<div class="pop-footer">
 						<?php echo esc_html__( 'Need An Account,', 'wpqa' ).' <a href="#" class="signup-panel">'.esc_html__( 'Sign Up Here', 'wpqa' ).'</a>';?>
 					</div><!-- End pop-footer -->
 				<?php }?>
-			</div><!-- End wpqa-question -->
-			
-			<?php $ask_question_to_users = wpqa_options("ask_question_to_users");
-			if ($ask_question_to_users == "on" && wpqa_is_user_profile()) {?>
-				<div class="panel-pop" id="wpqa-question-user"<?php echo (isset($register) && $register == true?"":' data-width="690"')?>>
+			</div><!-- End wpqa-question-user -->
+		<?php }
+
+		$active_post_popup = wpqa_options("active_post_popup");
+		if ($active_post_popup == "on") {
+			$register = false;?>
+			<div class="panel-pop" id="wpqa-post"<?php echo (isset($register) && $register == true?"":' data-width="690"')?>>
+				<i class="icon-cancel"></i>
+				<div class="panel-pop-content">
+					<?php echo do_shortcode("[wpqa_add_post popup='popup']");?>
+				</div><!-- End panel-pop-content -->
+				<?php $custom_permission = wpqa_options("custom_permission");
+				$add_post_no_register = wpqa_options("add_post_no_register");
+				$add_post = wpqa_options("add_post");
+				if (($custom_permission == "on" && is_user_logged_in() && empty($roles["add_post"])) || ($custom_permission == "on" && !is_user_logged_in() && $add_post != "on")) {
+					if (!is_user_logged_in()) {
+						$register = true;
+					}
+				}else if (!is_user_logged_in() && $add_post_no_register != "on") {
+					$register = true;
+				}
+
+				if (isset($register) && $register == true) {?>
+					<div class="pop-footer">
+						<?php echo esc_html__( 'Need An Account,', 'wpqa' ).' <a href="#" class="signup-panel">'.esc_html__( 'Sign Up Here', 'wpqa' ).'</a>';?>
+					</div><!-- End pop-footer -->
+				<?php }?>
+			</div><!-- End wpqa-post -->
+		<?php }
+
+		$active_message = wpqa_options("active_message");
+		$active_message_filter = apply_filters('wpqa_active_message_filter',false);
+		if ($active_message == "on" && (wpqa_is_user_profile() || $active_message_filter == true)) {
+			$received_message = "";
+			$user_block_message = array();
+			$send_message_no_register = wpqa_options("send_message_no_register");
+			$wpqa_user_id = (int)get_query_var(apply_filters('wpqa_user_id','wpqa_user_id'));
+
+			if (isset($wpqa_user_id) && $wpqa_user_id > 0) {
+				$received_message = esc_attr(get_the_author_meta('received_message',$wpqa_user_id));
+				$user_block_message = get_user_meta($wpqa_user_id,"user_block_message",true);
+			}
+			$block_message = esc_attr(get_the_author_meta('block_message',$wpqa_user_id));
+
+			if (((!is_user_logged_in() && $send_message_no_register == "on") || (is_user_logged_in() && (empty($user_block_message) || (isset($user_block_message) && is_array($user_block_message) && !in_array(get_current_user_id(),$user_block_message))) && ($block_message != "on" || is_super_admin($wpqa_user_id)) && ($received_message == "" || $received_message == "on")))) {
+				$register = false;
+				$custom_permission = wpqa_options("custom_permission");
+				$send_message_no_register = wpqa_options("send_message_no_register");
+				$send_message = wpqa_options("send_message");
+				if (($custom_permission == "on" && is_user_logged_in() && empty($roles["send_message"])) || ($custom_permission == "on" && !is_user_logged_in() && $send_message != "on")) {
+					if (!is_user_logged_in()) {
+						$register = true;
+					}
+				}else if (!is_user_logged_in() && $send_message_no_register != "on") {
+					$register = true;
+				}?>
+				<div class="panel-pop" id="wpqa-message"<?php echo (isset($register) && $register == true?"":' data-width="690"')?>>
 					<i class="icon-cancel"></i>
 					<div class="panel-pop-content">
-						<?php echo do_shortcode("[wpqa_question type='user' popup='popup']");?>
+						<?php echo do_shortcode("[wpqa_send_message popup='popup']");?>
 					</div><!-- End panel-pop-content -->
 					<?php if (isset($register) && $register == true) {?>
 						<div class="pop-footer">
 							<?php echo esc_html__( 'Need An Account,', 'wpqa' ).' <a href="#" class="signup-panel">'.esc_html__( 'Sign Up Here', 'wpqa' ).'</a>';?>
 						</div><!-- End pop-footer -->
 					<?php }?>
-				</div><!-- End wpqa-question-user -->
-			<?php }
-			
-			$active_post_popup = wpqa_options("active_post_popup");
-			if ($active_post_popup == "on") {
-				$register = false;?>
-				<div class="panel-pop" id="wpqa-post"<?php echo (isset($register) && $register == true?"":' data-width="690"')?>>
-					<i class="icon-cancel"></i>
-					<div class="panel-pop-content">
-						<?php echo do_shortcode("[wpqa_add_post popup='popup']");?>
-					</div><!-- End panel-pop-content -->
-					<?php $custom_permission = wpqa_options("custom_permission");
-					$add_post_no_register = wpqa_options("add_post_no_register");
-					$add_post = wpqa_options("add_post");
-					if (($custom_permission == "on" && is_user_logged_in() && empty($roles["add_post"])) || ($custom_permission == "on" && !is_user_logged_in() && $add_post != "on")) {
-						if (!is_user_logged_in()) {
-							$register = true;
-						}
-					}else if (!is_user_logged_in() && $add_post_no_register != "on") {
-						$register = true;
-					}
-					
-					if (isset($register) && $register == true) {?>
-						<div class="pop-footer">
-							<?php echo esc_html__( 'Need An Account,', 'wpqa' ).' <a href="#" class="signup-panel">'.esc_html__( 'Sign Up Here', 'wpqa' ).'</a>';?>
-						</div><!-- End pop-footer -->
-					<?php }?>
-				</div><!-- End wpqa-post -->
-			<?php }
-			
-			$active_message = wpqa_options("active_message");
-			$active_message_filter = apply_filters('wpqa_active_message_filter',false);
-			if ($active_message == "on" && (wpqa_is_user_profile() || $active_message_filter == true)) {
-				$received_message = "";
-				$user_block_message = array();
-				$send_message_no_register = wpqa_options("send_message_no_register");
-				$wpqa_user_id = (int)get_query_var(apply_filters('wpqa_user_id','wpqa_user_id'));
-				
-				if (isset($wpqa_user_id) && $wpqa_user_id > 0) {
-					$received_message = esc_attr(get_the_author_meta('received_message',$wpqa_user_id));
-					$user_block_message = get_user_meta($wpqa_user_id,"user_block_message",true);
-				}
-				$block_message = esc_attr(get_the_author_meta('block_message',$wpqa_user_id));
-				
-				if (((!is_user_logged_in() && $send_message_no_register == "on") || (is_user_logged_in() && (empty($user_block_message) || (isset($user_block_message) && is_array($user_block_message) && !in_array(get_current_user_id(),$user_block_message))) && ($block_message != "on" || is_super_admin($wpqa_user_id)) && ($received_message == "" || $received_message == "on")))) {
-					$register = false;
-					$custom_permission = wpqa_options("custom_permission");
-					$send_message_no_register = wpqa_options("send_message_no_register");
-					$send_message = wpqa_options("send_message");
-					if (($custom_permission == "on" && is_user_logged_in() && empty($roles["send_message"])) || ($custom_permission == "on" && !is_user_logged_in() && $send_message != "on")) {
-						if (!is_user_logged_in()) {
-							$register = true;
-						}
-					}else if (!is_user_logged_in() && $send_message_no_register != "on") {
-						$register = true;
-					}?>
-					<div class="panel-pop" id="wpqa-message"<?php echo (isset($register) && $register == true?"":' data-width="690"')?>>
-						<i class="icon-cancel"></i>
-						<div class="panel-pop-content">
-							<?php echo do_shortcode("[wpqa_send_message popup='popup']");?>
-						</div><!-- End panel-pop-content -->
-						<?php if (isset($register) && $register == true) {?>
-							<div class="pop-footer">
-								<?php echo esc_html__( 'Need An Account,', 'wpqa' ).' <a href="#" class="signup-panel">'.esc_html__( 'Sign Up Here', 'wpqa' ).'</a>';?>
-							</div><!-- End pop-footer -->
-						<?php }?>
-					</div><!-- End wpqa-message -->
-				<?php }
-			}
-			
-			$active_reports = wpqa_options("active_reports");
-			$active_logged_reports = wpqa_options("active_logged_reports");
-			if ($active_reports == "on" && (is_user_logged_in() || (!is_user_logged_in() && $active_logged_reports != "on"))) {
-				global $post;?>
-				<div class="panel-pop" id="wpqa-report">
-					<i class="icon-cancel"></i>
-					<div class="panel-pop-content">
-						<p><?php esc_html_e("Please briefly explain why you feel this answer should be reported.","wpqa")?></p>
-						<form class="wpqa_form submit-report" method="post">
-							<div class="wpqa_error"></div>
-							<div class="wpqa_success"></div>
-							<div class="form-inputs clearfix">
-								<p class="login-text">
-									<label for="explain-reported"><?php esc_html_e("Explain","wpqa")?><span class="required">*</span></label>
-									<textarea id="explain-reported" name="explain"></textarea>
-									<i class="icon-pencil"></i>
-								</p>
-							</div>
-							<p class="form-submit">
-								<span class="load_span"><span class="loader_2"></span></span>
-								<input type="hidden" name="wpqa_report_nonce" value="<?php echo wp_create_nonce("wpqa_report_nonce")?>">
-								<input type="submit" value="<?php esc_attr_e("Report","wpqa")?>" class="button-default button-hide-click">
-							</p>
-							<input type="hidden" name="form_type" value="wpqa-report">
-							<input type="hidden" name="post_id" value="<?php echo (isset($post->ID)?esc_attr($post->ID):"")?>">
-						</form>
-					</div><!-- End panel-pop-content -->
-				</div><!-- End wpqa-report -->
+				</div><!-- End wpqa-message -->
 			<?php }
 		}
+
+		$active_reports = wpqa_options("active_reports");
+		$active_logged_reports = wpqa_options("active_logged_reports");
+		if ($active_reports == "on" && (is_user_logged_in() || (!is_user_logged_in() && $active_logged_reports != "on"))) {
+			global $post;?>
+			<div class="panel-pop" id="wpqa-report">
+				<i class="icon-cancel"></i>
+				<div class="panel-pop-content">
+					<p><?php esc_html_e("Please briefly explain why you feel this answer should be reported.","wpqa")?></p>
+					<form class="wpqa_form submit-report" method="post">
+						<div class="wpqa_error"></div>
+						<div class="wpqa_success"></div>
+						<div class="form-inputs clearfix">
+							<p class="login-text">
+								<label for="explain-reported"><?php esc_html_e("Explain","wpqa")?><span class="required">*</span></label>
+								<textarea id="explain-reported" name="explain"></textarea>
+								<i class="icon-pencil"></i>
+							</p>
+						</div>
+						<p class="form-submit">
+							<span class="load_span"><span class="loader_2"></span></span>
+							<input type="hidden" name="wpqa_report_nonce" value="<?php echo wp_create_nonce("wpqa_report_nonce")?>">
+							<input type="submit" value="<?php esc_attr_e("Report","wpqa")?>" class="button-default button-hide-click">
+						</p>
+						<input type="hidden" name="form_type" value="wpqa-report">
+						<input type="hidden" name="post_id" value="<?php echo (isset($post->ID)?esc_attr($post->ID):"")?>">
+					</form>
+				</div><!-- End panel-pop-content -->
+			</div><!-- End wpqa-report -->
+		<?php }
 	}
+}
 endif;
 /* Check if site for the users only */
 if (!function_exists('wpqa_site_users_only')) :
@@ -3836,7 +3838,7 @@ if (!function_exists('wpqa_pagination')) :
 		}
 		/* If we're on a search results page,we need to change this up a bit. */
 		if (class_exists("WPQA") && !wpqa_is_search() && is_search()) {
-		/* If we're in BuddyPress,use the default "unpretty" URL structure. */
+			/* If we're in BuddyPress,use the default "unpretty" URL structure. */
 			if (class_exists('BP_Core_User')) {
 				$search_query = esc_attr(get_query_var('s'));
 				$base = user_trailingslashit(esc_url(home_url('/'))) . '?s=' . $search_query . '&paged=%#%';
@@ -3859,10 +3861,10 @@ if (!function_exists('wpqa_pagination')) :
 		preg_match($pattern,$args['base'],$raw_querystring);
 		if ($wp_rewrite->using_permalinks() && $raw_querystring)
 			$raw_querystring[0] = str_replace('','',$raw_querystring[0]);
-			if (!empty($raw_querystring)) {
-				$args['base'] = str_replace($raw_querystring[0],'',$args['base']);
-				$args['base'] .= substr($raw_querystring[0],0,-1);
-			}
+		if (!empty($raw_querystring)) {
+			$args['base'] = str_replace($raw_querystring[0],'',$args['base']);
+			$args['base'] .= substr($raw_querystring[0],0,-1);
+		}
 		/* Get the paginated links. */
 		$page_links = paginate_links($args);
 		/* Remove 'page/1' from the entire output since it's not needed. */
@@ -4004,102 +4006,102 @@ if (!function_exists('wpqa_pagination_load')) :
 													mejs.plugins.silverlight[0].types.push('video/x-ms-wmv');
 													mejs.plugins.silverlight[0].types.push('audio/x-ms-wma');
 													jQuery(function () {
-														var settings = {};
-														if ( typeof _wpmejsSettings !== 'undefined' ) {
-															settings = _wpmejsSettings;
-														}
-														settings.success = settings.success || function (mejs) {
-															var autoplay, loop;
-															if ( 'flash' === mejs.pluginType ) {
-																autoplay = mejs.attributes.autoplay && 'false' !== mejs.attributes.autoplay;
-																loop = mejs.attributes.loop && 'false' !== mejs.attributes.loop;
-																autoplay && mejs.addEventListener( 'canplay', function () {
-																	mejs.play();
-																}, false );
-																loop && mejs.addEventListener( 'ended', function () {
-																	mejs.play();
-																}, false );
-															}
-														};
-														jQuery('.post-section-new-'+n+' .wp-audio-shortcode').mediaelementplayer( settings );
-													});
+													var settings = {};
+													if ( typeof _wpmejsSettings !== 'undefined' ) {
+													settings = _wpmejsSettings;
 												}
-												$link.closest(main_content).find(".posts-"+load_type+" .load_span").hide();
-												if (load_type == "load-more") {
-													$link.closest(main_content).find(".posts-"+load_type+" a").show();
-												}
-												/* Content */
-												jQuery(".discy-main-wrap,.fixed-sidebar,.fixed_nav_menu").css({"height":"auto"});
-												/* load more */
-												if ($this_div.find(".posts-"+load_type).length) {
-													if (load_type == "infinite-scroll") {
-														$link.closest(main_content).find(".posts-infinite-scroll").html($this_div.find(".posts-infinite-scroll").html()).animate({opacity: 0}, 300).css("padding","0");
-													}else {
-														$link.closest(main_content).find(".posts-"+load_type).html($this_div.find(".posts-"+load_type).html());
-													}
-												}else {
-													$link.closest(main_content).find(".pagination-wrap").html('<p class="no-comments"><?php echo esc_js($nomore_text)?></p>');
-													$link.closest(main_content).find(".posts-"+load_type).fadeOut("fast").remove();
-												}
-												if (jQuery(".post-section-new-"+n+".post-with-columns").length) {
-													jQuery(".post-section-new-"+n+".post-with-columns").matchHeight();
-													jQuery(".post-section-new-"+n+".post-with-columns > .article-question").matchHeight();
-												}
-												jQuery("<?php echo (isset($it_answer_pagination) && $it_answer_pagination == true?"comment":"post-section")?>-new-"+n).removeClass("<?php echo (isset($it_answer_pagination) && $it_answer_pagination == true?"comment":"post-section")?>-new-"+n);
-												return false;
-											});
-										});
+												settings.success = settings.success || function (mejs) {
+												var autoplay, loop;
+												if ( 'flash' === mejs.pluginType ) {
+												autoplay = mejs.attributes.autoplay && 'false' !== mejs.attributes.autoplay;
+												loop = mejs.attributes.loop && 'false' !== mejs.attributes.loop;
+												autoplay && mejs.addEventListener( 'canplay', function () {
+												mejs.play();
+											}, false );
+											loop && mejs.addEventListener( 'ended', function () {
+											mejs.play();
+										}, false );
 									}
-								}
-								/* infinite scroll */
-								jQuery(".posts-infinite-scroll").each (function () {
-									jQuery(this).bind("inview",function(event,isInView,visiblePartX,visiblePartY) {
-										if  (jQuery(".posts-infinite-scroll").length && isInView) {
-											/* wpqa_load_more */
-											ajax_new_count++;
-											wpqa_load_more("infinite-scroll","",ajax_new_count);
-										}
-									});
-								});
-								/* load more */
-								jQuery("body").on("click",".posts-load-more a",function(e) {
-									e.preventDefault();
-									/* wpqa_load_more */
-									ajax_new_count++;
-									wpqa_load_more("load-more",jQuery(this),ajax_new_count);
-								});
+								};
+								jQuery('.post-section-new-'+n+' .wp-audio-shortcode').mediaelementplayer( settings );
 							});
-						})(jQuery);
-					</script>
-				<?php endif;
-			}?>
-			
-			<div class="pagination-wrap<?php echo (isset($it_answer_pagination) && $it_answer_pagination == true?" pagination-answer":"").(isset($its_question) && $its_question == "question"?" pagination-question":"").(empty($more_link)?" no-pagination-wrap":"")?>">
-				<?php if ($post_pagination == "load_more" || $post_pagination == "infinite_scroll") {
-					$more_link = ($post_pagination == "load_more"?get_next_posts_link($load_text,$max_num_pages):$more_link);
-					if (!empty($more_link)) {?>
-						<div class="pagination-nav <?php echo ($post_pagination == "infinite_scroll"?"posts-infinite-scroll":"posts-load-more")?>">
-							<span class="load_span"><span class="loader_2"></span></span>
-							<div class="load-more"><?php echo ($more_link)?></div>
-						</div><!-- End pagination-nav -->
-					<?php }
-				}else if ($post_pagination == "pagination") {
-					wpqa_pagination(array(),$max_num_pages,(isset($wpqa_query)?$wpqa_query:null));
-				}else {?>
-					<div class="page-navigation page-navigation-before clearfix">
-						<div class="row">
-							<div class="col col6">
-								<div class="nav-next"><?php next_posts_link('<i class="icon-left-thin"></i><span>'.(isset($its_question) && $its_question == "question"?esc_html__('Old Questions',"wpqa"):esc_html__('Old Entries',"wpqa")).'</span>',$max_num_pages)?></div>
-							</div>
-							<div class="col col6">
-								<div class="nav-previous"><?php previous_posts_link('<span>'.(isset($its_question) && $its_question == "question"?esc_html__('New Questions',"wpqa"):esc_html__('New Entries',"wpqa")).'</span><i class="icon-right-thin"></i>',$max_num_pages)?></div>
-							</div>
-						</div>
-					</div>
-				<?php }?>
-			</div>
-		<?php }
+						}
+						$link.closest(main_content).find(".posts-"+load_type+" .load_span").hide();
+						if (load_type == "load-more") {
+						$link.closest(main_content).find(".posts-"+load_type+" a").show();
+					}
+					/* Content */
+					jQuery(".discy-main-wrap,.fixed-sidebar,.fixed_nav_menu").css({"height":"auto"});
+					/* load more */
+					if ($this_div.find(".posts-"+load_type).length) {
+					if (load_type == "infinite-scroll") {
+					$link.closest(main_content).find(".posts-infinite-scroll").html($this_div.find(".posts-infinite-scroll").html()).animate({opacity: 0}, 300).css("padding","0");
+				}else {
+				$link.closest(main_content).find(".posts-"+load_type).html($this_div.find(".posts-"+load_type).html());
+			}
+		}else {
+		$link.closest(main_content).find(".pagination-wrap").html('<p class="no-comments"><?php echo esc_js($nomore_text)?></p>');
+		$link.closest(main_content).find(".posts-"+load_type).fadeOut("fast").remove();
 	}
+	if (jQuery(".post-section-new-"+n+".post-with-columns").length) {
+	jQuery(".post-section-new-"+n+".post-with-columns").matchHeight();
+	jQuery(".post-section-new-"+n+".post-with-columns > .article-question").matchHeight();
+}
+jQuery("<?php echo (isset($it_answer_pagination) && $it_answer_pagination == true?"comment":"post-section")?>-new-"+n).removeClass("<?php echo (isset($it_answer_pagination) && $it_answer_pagination == true?"comment":"post-section")?>-new-"+n);
+return false;
+});
+});
+}
+}
+/* infinite scroll */
+jQuery(".posts-infinite-scroll").each (function () {
+jQuery(this).bind("inview",function(event,isInView,visiblePartX,visiblePartY) {
+if  (jQuery(".posts-infinite-scroll").length && isInView) {
+/* wpqa_load_more */
+ajax_new_count++;
+wpqa_load_more("infinite-scroll","",ajax_new_count);
+}
+});
+});
+/* load more */
+jQuery("body").on("click",".posts-load-more a",function(e) {
+e.preventDefault();
+/* wpqa_load_more */
+ajax_new_count++;
+wpqa_load_more("load-more",jQuery(this),ajax_new_count);
+});
+});
+})(jQuery);
+</script>
+<?php endif;
+}?>
+
+<div class="pagination-wrap<?php echo (isset($it_answer_pagination) && $it_answer_pagination == true?" pagination-answer":"").(isset($its_question) && $its_question == "question"?" pagination-question":"").(empty($more_link)?" no-pagination-wrap":"")?>">
+	<?php if ($post_pagination == "load_more" || $post_pagination == "infinite_scroll") {
+		$more_link = ($post_pagination == "load_more"?get_next_posts_link($load_text,$max_num_pages):$more_link);
+		if (!empty($more_link)) {?>
+			<div class="pagination-nav <?php echo ($post_pagination == "infinite_scroll"?"posts-infinite-scroll":"posts-load-more")?>">
+				<span class="load_span"><span class="loader_2"></span></span>
+				<div class="load-more"><?php echo ($more_link)?></div>
+			</div><!-- End pagination-nav -->
+		<?php }
+	}else if ($post_pagination == "pagination") {
+		wpqa_pagination(array(),$max_num_pages,(isset($wpqa_query)?$wpqa_query:null));
+	}else {?>
+		<div class="page-navigation page-navigation-before clearfix">
+			<div class="row">
+				<div class="col col6">
+					<div class="nav-next"><?php next_posts_link('<i class="icon-left-thin"></i><span>'.(isset($its_question) && $its_question == "question"?esc_html__('Old Questions',"wpqa"):esc_html__('Old Entries',"wpqa")).'</span>',$max_num_pages)?></div>
+				</div>
+				<div class="col col6">
+					<div class="nav-previous"><?php previous_posts_link('<span>'.(isset($its_question) && $its_question == "question"?esc_html__('New Questions',"wpqa"):esc_html__('New Entries',"wpqa")).'</span><i class="icon-right-thin"></i>',$max_num_pages)?></div>
+				</div>
+			</div>
+		</div>
+	<?php }?>
+</div>
+<?php }
+}
 endif;
 /* Share links */
 if (!function_exists('wpqa_share')) :
@@ -4328,25 +4330,25 @@ if (!function_exists('wpqa_get_user_stats')) :
 					if (is_array($categories_user_points) && !empty($categories_user_points)) {
 						$display_name = get_the_author_meta('display_name',$wpqa_user_id);
 						echo "<ul class='row user-points-categories'>
-							<li class='col'>
-								<div>
-									<h5><i class='icon-graduation-cap'></i>".$display_name." ".esc_html__("has been qualified at the following categories","wpqa")."</h5>
-									<ul>";
-										$category_with_points = array();
-										foreach ($categories_user_points as $category) {
-											$category_with_points[$category] = (int)get_user_meta($wpqa_user_id,"points_category".$category,true);
-										}
-										arsort($category_with_points);
-										foreach ($category_with_points as $category => $points) {
-											$get_term = get_term($category,'question-category');
-											echo "<li>
-												<i class='icon-bucket'></i>
-												".apply_filters("wpqa_filter_categories_points","<a href='".get_term_link($get_term->slug,'question-category')."'>".$get_term->name."</a> (".$points." ".esc_html__("points","wpqa").") ".wpqa_get_badge($wpqa_user_id,"",$points),$get_term,$points,$wpqa_user_id)."
-											</li>";
-										}
-									echo "</ul>
-								</div>
-							</li>
+						<li class='col'>
+						<div>
+						<h5><i class='icon-graduation-cap'></i>".$display_name." ".esc_html__("has been qualified at the following categories","wpqa")."</h5>
+						<ul>";
+						$category_with_points = array();
+						foreach ($categories_user_points as $category) {
+							$category_with_points[$category] = (int)get_user_meta($wpqa_user_id,"points_category".$category,true);
+						}
+						arsort($category_with_points);
+						foreach ($category_with_points as $category => $points) {
+							$get_term = get_term($category,'question-category');
+							echo "<li>
+							<i class='icon-bucket'></i>
+							".apply_filters("wpqa_filter_categories_points","<a href='".get_term_link($get_term->slug,'question-category')."'>".$get_term->name."</a> (".$points." ".esc_html__("points","wpqa").") ".wpqa_get_badge($wpqa_user_id,"",$points),$get_term,$points,$wpqa_user_id)."
+							</li>";
+						}
+						echo "</ul>
+						</div>
+						</li>
 						</ul>";
 					}
 				}?>
@@ -4402,4 +4404,4 @@ if (!function_exists('wpqa_add_points')) :
 			}
 		}
 	}
-endif;?>
+	endif;?>
